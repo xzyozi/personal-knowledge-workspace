@@ -15,30 +15,31 @@
 - `04-sources` への定周期キャプチャ
 - `02-facts` への検証済み事実の昇格
 - `PROJECT.md` と `projects/` によるプロジェクト管理
-- `.gemeni`、`.claude`、`.codex` のAIツール連携
+- `.kiro`、`.gemeni`、`.claude`、`.codex` のAIツール連携
 
 ## Non-goals
 
 - 認証情報・秘密鍵・APIキーの保存
-- `.kiro` の探索、収集、分析
+- `.kiro` をプロジェクト自動検知のマーカーとして使うこと
+- `.kiro` のローカルspec、hook、lesson、stateの収集・分析
 - AIによる事実の無承認な確定
 - 大容量ファイルのGit管理
 - 自動処理による送信・削除・公開などの不可逆操作
 
 ## Canonical locations
 
-| 内容 | 保存先 |
-| --- | --- |
-| 入口と共通方針 | `AGENTS.md` |
-| プロジェクトの現在状態 | `PROJECT.md` |
-| 読み書き・分類ルール | `knowledge/00-rules/` |
-| 検証済み事実 | `knowledge/02-facts/` |
-| 生成成果物 | `knowledge/03-output/` |
-| 原本・定期記録 | `knowledge/04-sources/` |
-| タスク・次のアクション | `knowledge/05-tasks/` |
-| プロジェクト一覧 | `projects/` |
-| 決定的な処理 | `scripts/` |
-| AIツール固有の入口 | `.gemeni/`, `.claude/`, `.codex/` |
+| 内容                   | 保存先                                      |
+| ---------------------- | ------------------------------------------- |
+| 入口と共通方針         | `AGENTS.md`                                 |
+| プロジェクトの現在状態 | `PROJECT.md`                                |
+| 読み書き・分類ルール   | `knowledge/00-rules/`                       |
+| 検証済み事実           | `knowledge/02-facts/`                       |
+| 生成成果物             | `knowledge/03-output/`                      |
+| 原本・定期記録         | `knowledge/04-sources/`                     |
+| タスク・次のアクション | `knowledge/05-tasks/`                       |
+| プロジェクト一覧       | `projects/`                                 |
+| 決定的な処理           | `scripts/`                                  |
+| AIツール固有の入口     | `.kiro/`, `.gemeni/`, `.claude/`, `.codex/` |
 
 ## Change policy
 
