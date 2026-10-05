@@ -8,6 +8,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED_DIRECTORIES = (
+    ".kiro",
+    ".kiro/steering",
     "knowledge",
     "knowledge/00-rules",
     "knowledge/01-private",
@@ -24,6 +26,11 @@ REQUIRED_FILES = (
     "README.md",
     "PROJECT.md",
     "AGENTS.md",
+    ".kiro/README.md",
+    ".kiro/steering/knowledge-entry.md",
+    ".gemeni/knowledge-entry.md",
+    ".claude/knowledge-entry.md",
+    ".codex/knowledge-entry.md",
     "knowledge/INDEX.md",
     "knowledge/00-rules/00.01-entry-rule.md",
     "knowledge/00-rules/00.02-read-policy.md",
@@ -33,7 +40,7 @@ REQUIRED_FILES = (
     "knowledge/06-large/.gitignore",
     "scripts/validate_structure.py",
 )
-AI_DIRECTORIES = (".gemeni", ".claude", ".codex")
+AI_DIRECTORIES = (".kiro", ".gemeni", ".claude", ".codex")
 EXCLUDED_DIRECTORY_NAMES = {".git", ".kiro", "__pycache__"}
 SENSITIVE_NAME = re.compile(
     r"(^|[._-])(env|secret|secrets|token|credential|credentials|password|passwd)([._-]|$)",
