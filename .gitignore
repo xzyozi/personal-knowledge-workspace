@@ -218,3 +218,25 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Kiro integration is intentionally outside this repository's scan scope
+.kiro/
+
+# Local-only and large knowledge data
+/knowledge/01-private/*
+!/knowledge/01-private/.gitignore
+!/knowledge/01-private/README.md
+/knowledge/06-large/*
+!/knowledge/06-large/.gitignore
+!/knowledge/06-large/README.md
+
+# Local AI tool state and secrets; keep only safe documentation/templates
+/.gemeni/*
+!/.gemeni/README.md
+!/.gemeni/*.example
+/.claude/*
+!/.claude/README.md
+!/.claude/*.example
+/.codex/*
+!/.codex/README.md
+!/.codex/*.example
