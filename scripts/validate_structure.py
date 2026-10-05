@@ -16,6 +16,7 @@ REQUIRED_DIRECTORIES = (
     "knowledge/02-facts",
     "knowledge/03-output",
     "knowledge/04-sources",
+    "knowledge/04-sources/04.00-inbox",
     "knowledge/05-tasks",
     "knowledge/06-large",
     "knowledge/99-archive",
