@@ -8,7 +8,7 @@
 - Johnny.Decimalの考え方で、情報の場所を固定する
 - 定周期で作業の観測記録を保存する
 - 必要な事実だけをAIに読ませ、全体の一括読み込みを避ける
-- `.kiro`、`.gemeni`、`.claude`、`.codex` のAIツール連携を同居させる
+- `GEMINI.md` と `.kiro`、`.gemeni`、`.claude`、`.codex` のAIツール連携を同居させる
 - プロジェクトの現在状態と実装仕様を別々に管理する
 
 ## 基本構成
@@ -17,6 +17,7 @@
 .
 ├─ AGENTS.md
 ├─ PROJECT.md
+├─ GEMINI.md
 ├─ knowledge/
 │  ├─ INDEX.md
 │  ├─ 00-rules/
@@ -60,14 +61,22 @@ knowledge/03-output/
 
 ## AIツール対象
 
-このリポジトリで共有テンプレートの対象にするAIツール入口は次の4つです。
+このリポジトリで共有テンプレートの対象にするAIツール入口は次のとおりです。
+
+### 自動入口
+
+- `AGENTS.md`: Claude Code、Codex、共通入口
+- `GEMINI.md`: Gemini CLI
+- `.kiro/steering/knowledge-entry.md`: Kiro
+
+### 補助アダプター
 
 - `.kiro/`
 - `.gemeni/`
 - `.claude/`
 - `.codex/`
 
-`.kiro` はプロジェクト自動検知のマーカーには使いませんが、共有するREADMEとSteering参照はテンプレートとして管理します。Kiroのspec、hook、lesson、state、ローカル設定や認証情報は共有テンプレートへ含めません。各AIツールのローカル実体と秘密情報は、テンプレートと分離してください。
+補助アダプターは共通入口とナレッジルールへの参照を提供します。ローカル設定、認証情報、セッション状態、個人パスはコミットしません。`.kiro`はプロジェクト自動検知のマーカーには使わず、共有READMEとSteering入口だけをテンプレート管理します。
 
 ## 検証
 

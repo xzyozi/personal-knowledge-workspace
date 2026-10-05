@@ -26,6 +26,7 @@ REQUIRED_FILES = (
     "README.md",
     "PROJECT.md",
     "AGENTS.md",
+    "GEMINI.md",
     ".kiro/README.md",
     ".kiro/steering/knowledge-entry.md",
     ".gemeni/knowledge-entry.md",

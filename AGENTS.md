@@ -34,5 +34,6 @@
 - 共通入口: `AGENTS.md`
 - プロジェクト状態: `PROJECT.md`
 - ナレッジ運用: `knowledge/00-rules/`
+- Gemini CLI入口: `GEMINI.md`
 - Kiro入口: `.kiro/README.md`、`.kiro/steering/knowledge-entry.md`
 - その他のAIツール入口: `.gemeni/README.md`、`.gemeni/knowledge-entry.md`、`.claude/README.md`、`.claude/knowledge-entry.md`、`.codex/README.md`、`.codex/knowledge-entry.md`

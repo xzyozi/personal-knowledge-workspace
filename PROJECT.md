@@ -15,6 +15,7 @@
 - `04-sources` への定周期キャプチャ
 - `02-facts` への検証済み事実の昇格
 - `PROJECT.md` と `projects/` によるプロジェクト管理
+- `GEMINI.md` によるGemini CLI入口
 - `.kiro`、`.gemeni`、`.claude`、`.codex` のAIツール連携
 
 ## Non-goals
@@ -39,6 +40,7 @@
 | タスク・次のアクション | `knowledge/05-tasks/`                       |
 | プロジェクト一覧       | `projects/`                                 |
 | 決定的な処理           | `scripts/`                                  |
+| Gemini CLIの自動入口   | `GEMINI.md`                                 |
 | AIツール固有の入口     | `.kiro/`, `.gemeni/`, `.claude/`, `.codex/` |
 
 ## Change policy

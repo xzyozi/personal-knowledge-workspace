@@ -12,4 +12,5 @@
 - [ナレッジ索引](../knowledge/INDEX.md)
 - [読み取りルール](../knowledge/00-rules/00.02-read-policy.md)
 - [書き込みルール](../knowledge/00-rules/00.03-write-policy.md)
+- [Gemini CLI自動入口](../GEMINI.md)
 - [このツール用の参照入口](./knowledge-entry.md)
