@@ -1,0 +1,18 @@
+[profile]
+name = "default"
+
+[target]
+root = "~/.personal-knowledge-runtime"
+
+[storage.knowledge]
+provider = "local"
+namespace = "personal-knowledge"
+prefix = "knowledge"
+
+[storage.large]
+provider = "local"
+namespace = "personal-knowledge"
+prefix = "large"
+
+[report.server]
+port = 8765
