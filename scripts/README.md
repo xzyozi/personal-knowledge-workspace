@@ -2,9 +2,24 @@
 
 機械的に同じ結果を出せる処理を置きます。
 
-- 外部送信、削除、公開などの不可逆操作は自動処理に含めない
-- 秘密情報を引数やログへ出力しない
-- 生成物の保存先を明示する
-- 処理結果と検証結果を分離する
+- `bootstrap.py`: TOMLのallowlist/profileに従う非破壊初期適用
+- `view_bootstrap_report.py`: 固定HTMLとJSONをローカル表示するツール
+- `test_bootstrap.py`: 一時fixtureだけを使うbootstrap検証
+- `validate_structure.py`: リポジトリ構造検証
 
-構造検証の入口は `validate_structure.py` です。
+## Bootstrap
+
+標準設定は`config/bootstrap.toml`、ユーザー固有設定は初回実行時に`config/bootstrap.local.example.toml`からコピーされる`config/bootstrap.local.toml`です。
+
+```powershell
+# dry-run（既定）
+python scripts/bootstrap.py
+
+# 衝突がない場合だけ適用
+python scripts/bootstrap.py --apply --confirm
+
+# ローカルレポートを表示
+python scripts/view_bootstrap_report.py
+```
+
+外部送信、クラウド接続、削除、公開などの不可逆操作は行いません。実行結果JSONはローカル生成物で、HTMLは固定ビューアです。

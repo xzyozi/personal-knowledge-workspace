@@ -1,0 +1,163 @@
+schema_version = 1
+default_profile = "default"
+
+[exit_codes]
+success = 0
+conflict = 10
+configuration_error = 20
+safety_error = 30
+internal_error = 1
+
+[messages]
+success = "bootstrapを完了しました"
+conflict = "既存ファイルとの衝突があります"
+configuration_error = "bootstrap設定が不正です"
+safety_error = "許可されていない対象またはパスです"
+internal_error = "予期しない内部エラーが発生しました"
+target_missing = "対象がありません"
+same_hash = "同一内容です"
+destination_is_directory = "保存先がディレクトリです"
+unmanaged_existing_file = "未管理の既存ファイルと衝突しました"
+source_managed_block_missing = "テンプレート側に管理ブロックがありません"
+managed_block_missing = "既存ファイルに管理ブロックがありません"
+managed_block_modified = "管理ブロックがユーザーによって変更されています"
+managed_block_not_utf8 = "管理ブロックをUTF-8として読めません"
+same_managed_block = "管理ブロックは同一です"
+managed_block_updated = "管理ブロックを更新します"
+
+[report]
+directory = "reports"
+html = "bootstrap-report.html"
+json = "bootstrap-report.json"
+
+[report.server]
+port = 8765
+
+[profiles.default]
+description = "共有入口、ナレッジ索引、共通ルール"
+
+[[profiles.default.targets]]
+id = "common-agents"
+source = "AGENTS.md"
+destination = "AGENTS.md"
+mode = "create-only"
+revision = 1
+
+[[profiles.default.targets]]
+id = "gemini-entry"
+source = "GEMINI.md"
+destination = "GEMINI.md"
+mode = "create-only"
+revision = 1
+
+[[profiles.default.targets]]
+id = "kiro-readme"
+source = ".kiro/README.md"
+destination = ".kiro/README.md"
+mode = "create-only"
+revision = 1
+
+[[profiles.default.targets]]
+id = "kiro-knowledge-entry"
+source = ".kiro/steering/knowledge-entry.md"
+destination = ".kiro/steering/knowledge-entry.md"
+mode = "create-only"
+revision = 1
+
+[[profiles.default.targets]]
+id = "gemeni-readme"
+source = ".gemeni/README.md"
+destination = ".gemeni/README.md"
+mode = "create-only"
+revision = 1
+
+[[profiles.default.targets]]
+id = "gemeni-knowledge-entry"
+source = ".gemeni/knowledge-entry.md"
+destination = ".gemeni/knowledge-entry.md"
+mode = "create-only"
+revision = 1
+
+[[profiles.default.targets]]
+id = "claude-readme"
+source = ".claude/README.md"
+destination = ".claude/README.md"
+mode = "create-only"
+revision = 1
+
+[[profiles.default.targets]]
+id = "claude-knowledge-entry"
+source = ".claude/knowledge-entry.md"
+destination = ".claude/knowledge-entry.md"
+mode = "create-only"
+revision = 1
+
+[[profiles.default.targets]]
+id = "codex-readme"
+source = ".codex/README.md"
+destination = ".codex/README.md"
+mode = "create-only"
+revision = 1
+
+[[profiles.default.targets]]
+id = "codex-knowledge-entry"
+source = ".codex/knowledge-entry.md"
+destination = ".codex/knowledge-entry.md"
+mode = "create-only"
+revision = 1
+
+[[profiles.default.targets]]
+id = "knowledge-index"
+source = "knowledge/INDEX.md"
+destination = "knowledge/INDEX.md"
+mode = "create-only"
+revision = 1
+
+[[profiles.default.targets]]
+id = "knowledge-rules"
+source = "knowledge/00-rules"
+destination = "knowledge/00-rules"
+mode = "create-only"
+revision = 1
+
+[profiles.personal]
+extends = "default"
+description = "共有構成に個人用knowledgeを追加するprofile"
+
+[[profiles.personal.targets]]
+id = "personal-facts"
+source = "knowledge/02-facts"
+destination = "knowledge/02-facts"
+mode = "create-only"
+revision = 1
+
+[[profiles.personal.targets]]
+id = "personal-output"
+source = "knowledge/03-output"
+destination = "knowledge/03-output"
+mode = "create-only"
+revision = 1
+
+[[profiles.personal.targets]]
+id = "personal-sources"
+source = "knowledge/04-sources"
+destination = "knowledge/04-sources"
+mode = "create-only"
+revision = 1
+
+[[profiles.personal.targets]]
+id = "personal-tasks"
+source = "knowledge/05-tasks"
+destination = "knowledge/05-tasks"
+mode = "create-only"
+revision = 1
+
+[storage.knowledge]
+provider = "local"
+namespace = "personal-knowledge"
+prefix = "knowledge"
+
+[storage.large]
+provider = "local"
+namespace = "personal-knowledge"
+prefix = "large"
