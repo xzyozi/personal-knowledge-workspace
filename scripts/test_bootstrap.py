@@ -32,9 +32,10 @@ def write_local_config(worktree: Path, target: Path) -> None:
 
 def run_bootstrap(worktree: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, str(worktree / "scripts" / "bootstrap.py"), *args],
+        [sys.executable, "-X", "utf8", str(worktree / "scripts" / "bootstrap.py"), *args],
         cwd=worktree,
         text=True,
+        encoding="utf-8",
         capture_output=True,
         check=False,
     )
