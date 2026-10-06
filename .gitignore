@@ -246,3 +246,8 @@ __marimo__/
 !/.codex/README.md
 !/.codex/knowledge-entry.md
 !/.codex/*.example
+
+# Bootstrap local configuration and runtime report
+/config/bootstrap.local.toml
+/reports/bootstrap-report.json
+/.pkw-runtime/

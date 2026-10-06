@@ -1,17 +1,25 @@
-name: Validate structure
+name: Validate workspace
 
 on:
   push:
+    branches:
+      - main
   pull_request:
-  workflow_dispatch:
+    branches:
+      - main
 
 permissions:
   contents: read
 
 jobs:
-  structure:
-    name: Validate workspace structure
-    runs-on: ubuntu-latest
+  validate:
+    name: Validate workspace and bootstrap fixtures
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -23,3 +31,6 @@ jobs:
 
       - name: Validate structure
         run: python scripts/validate_structure.py
+
+      - name: Validate bootstrap fixtures
+        run: python scripts/test_bootstrap.py

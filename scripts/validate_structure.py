@@ -10,6 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 REQUIRED_DIRECTORIES = (
     ".kiro",
     ".kiro/steering",
+    "config",
+    "reports",
     "knowledge",
     "knowledge/00-rules",
     "knowledge/01-private",
@@ -30,6 +32,10 @@ REQUIRED_FILES = (
     "GEMINI.md",
     ".kiro/README.md",
     ".kiro/steering/knowledge-entry.md",
+    "config/bootstrap.toml",
+    "config/bootstrap.local.example.toml",
+    "reports/bootstrap-report.html",
+    "reports/README.md",
     ".gemeni/knowledge-entry.md",
     ".claude/knowledge-entry.md",
     ".codex/knowledge-entry.md",
@@ -41,6 +47,9 @@ REQUIRED_FILES = (
     "knowledge/01-private/.gitignore",
     "knowledge/06-large/.gitignore",
     "scripts/validate_structure.py",
+    "scripts/bootstrap.py",
+    "scripts/view_bootstrap_report.py",
+    "scripts/test_bootstrap.py",
 )
 AI_DIRECTORIES = (".kiro", ".gemeni", ".claude", ".codex")
 EXCLUDED_DIRECTORY_NAMES = {".git", ".kiro", "__pycache__"}
