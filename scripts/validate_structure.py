@@ -37,6 +37,7 @@ REQUIRED_FILES = (
     "config/bootstrap.toml",
     "config/bootstrap.local.example.toml",
     "docs/design/reverse-bootstrap.md",
+    "docs/design/migrate-knowledge.md",
     "reports/bootstrap-report.html",
     "reports/README.md",
     ".gemeni/knowledge-entry.md",
