@@ -1,4 +1,4 @@
-"""固定HTMLからローカルのbootstrap/reverse-bootstrapレポートを表示する。"""
+"""固定HTMLからローカルのbootstrap/reverse-bootstrap/migrateレポートを表示する。"""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="ローカルのworkspaceレポートを表示する")
     parser.add_argument(
         "--report",
-        choices=("bootstrap", "reverse"),
+        choices=("bootstrap", "reverse", "migrate"),
         default="bootstrap",
         help="表示するレポートの種類",
     )
@@ -25,7 +25,12 @@ def main(argv: list[str] | None = None) -> int:
     try:
         settings = load_settings()
         html_path = settings["report_html"]
-        report_path = settings["report_json"] if args.report == "bootstrap" else settings["reverse_report_json"]
+        report_paths = {
+            "bootstrap": settings["report_json"],
+            "reverse": settings["reverse_report_json"],
+            "migrate": settings["migrate_report_json"],
+        }
+        report_path = report_paths[args.report]
         report_dir = html_path.parent
         if not html_path.is_file():
             raise BootstrapError("configuration_error", f"HTMLレポートがありません: {html_path}")

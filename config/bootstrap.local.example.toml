@@ -16,3 +16,8 @@ prefix = "large"
 
 [report.server]
 port = 8765
+
+[migration]
+# migrate_knowledge.pyの移行元。ホーム(~)からの相対パスだけを指定する。
+# 例: sources = ["Documents/notes"]
+sources = []

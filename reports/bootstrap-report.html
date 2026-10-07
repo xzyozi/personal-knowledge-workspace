@@ -84,6 +84,19 @@
       color: #a16207;
     }
 
+    .action-register {
+      color: #1d4ed8;
+    }
+
+    .action-verified {
+      color: #166534;
+    }
+
+    .action-excluded {
+      color: #b91c1c;
+      font-weight: 700;
+    }
+
     .action-conflict,
     .action-error {
       color: #b91c1c;
@@ -133,7 +146,7 @@
         '"': '&quot;',
         "'": '&#39;'
       })[character]);
-      const safeAction = value => ['create', 'skip', 'update', 'delete', 'delete-candidate', 'warning', 'conflict', 'error'].includes(value) ? value : 'error';
+      const safeAction = value => ['create', 'skip', 'update', 'delete', 'delete-candidate', 'register', 'verified', 'excluded', 'warning', 'conflict', 'error'].includes(value) ? value : 'error';
       const statusClass = status => status === 'success' ? 'success' : 'conflict';
       const render = report => {
         const items = Array.isArray(report.items) ? report.items : [];

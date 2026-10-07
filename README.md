@@ -99,6 +99,48 @@ git diff
 
 reverse-bootstrapはcommit・pushを行いません。詳細な設計と安全条件は`docs/design/reverse-bootstrap.md`を参照してください。
 
+## 個人ナレッジの移行
+
+ホーム配下の既存テキストを、個人ナレッジ用リポジトリの`knowledge/04-sources/04.00-inbox/`へ取り込みます。個人ナレッジはこのテンプレートリポジトリではなく、別のprivateリポジトリで管理します。スクリプトはGit操作を行いません。
+
+移行元は、`config/bootstrap.local.toml`（Git管理外）にホームからの相対パスで指定します。
+
+```toml
+[migration]
+sources = ["Documents/notes"]
+```
+
+```powershell
+# dry-run（既定）
+python scripts/migrate_knowledge.py
+
+# 取り込み
+python scripts/migrate_knowledge.py --apply --confirm
+
+# 取り込み済みの内容をmanifestと照合（読み取り専用）
+python scripts/migrate_knowledge.py --verify
+
+# レポートを表示
+python scripts/view_bootstrap_report.py --report migrate
+```
+
+- 全件を`04.00-inbox`へ、ホームからの相対パスを保ったまま取り込みます。`02-facts`などへの分類は手動で行います。
+- 同名で内容が異なるファイルと、秘密情報の候補は、該当ファイルだけ取り込まず、残りを取り込みます。除外があれば終了コードは`10`です。
+- バイナリは取り込まず、`knowledge/06-large/manifest.json`へ登録します。外部ストレージへのコピーと復元は手動です。
+- 移行元は読み取り専用で、削除も上書きもしません。
+
+推奨運用の例:
+
+| 対象     | 推奨運用の例                                                |
+| -------- | ----------------------------------------------------------- |
+| テキスト | 作業区切りごとに個人リポジトリへcommit、週1回push           |
+| バイナリ | 追加したタイミングで外部ストレージへコピー、月1回`--verify` |
+
+詳細な設計と安全条件は`docs/design/migrate-knowledge.md`を参照してください。
+
+## 検証
+
+追加依存関係なしで構造を検証できます。
 
 ```powershell
 python scripts/validate_structure.py
