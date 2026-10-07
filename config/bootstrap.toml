@@ -29,6 +29,8 @@ managed_block_updated = "管理ブロックを更新します"
 directory = "reports"
 html = "bootstrap-report.html"
 json = "bootstrap-report.json"
+reverse_json = "reverse-bootstrap-report.json"
+state = "bootstrap-state.json"
 
 [report.server]
 port = 8765

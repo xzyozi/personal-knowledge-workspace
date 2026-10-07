@@ -250,4 +250,6 @@ __marimo__/
 # Bootstrap local configuration and runtime report
 /config/bootstrap.local.toml
 /reports/bootstrap-report.json
+/reports/reverse-bootstrap-report.json
+/reports/bootstrap-state.json
 /.pkw-runtime/
