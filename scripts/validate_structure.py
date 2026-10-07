@@ -11,6 +11,8 @@ REQUIRED_DIRECTORIES = (
     ".kiro",
     ".kiro/steering",
     "config",
+    "docs",
+    "docs/design",
     "reports",
     "knowledge",
     "knowledge/00-rules",
@@ -34,6 +36,7 @@ REQUIRED_FILES = (
     ".kiro/steering/knowledge-entry.md",
     "config/bootstrap.toml",
     "config/bootstrap.local.example.toml",
+    "docs/design/reverse-bootstrap.md",
     "reports/bootstrap-report.html",
     "reports/README.md",
     ".gemeni/knowledge-entry.md",
@@ -48,8 +51,10 @@ REQUIRED_FILES = (
     "knowledge/06-large/.gitignore",
     "scripts/validate_structure.py",
     "scripts/bootstrap.py",
+    "scripts/reverse_bootstrap.py",
     "scripts/view_bootstrap_report.py",
     "scripts/test_bootstrap.py",
+    "scripts/test_reverse_bootstrap.py",
 )
 AI_DIRECTORIES = (".kiro", ".gemeni", ".claude", ".codex")
 EXCLUDED_DIRECTORY_NAMES = {".git", ".kiro", "__pycache__"}
