@@ -236,7 +236,10 @@ def warning_item(mapping: Mapping, reason: str, message: str) -> ReverseItem:
 
 def add_mapping(mappings: dict[tuple[str, str], Mapping], mapping: Mapping) -> None:
     key = (mapping.source_rel.as_posix(), mapping.destination_rel.as_posix())
-    if key in mappings:
+    existing = mappings.get(key)
+    if existing is not None:
+        if existing.spec == mapping.spec:
+            return
         raise ReverseError("configuration_error", "source/targetのmappingが重複しています")
     mappings[key] = mapping
 
