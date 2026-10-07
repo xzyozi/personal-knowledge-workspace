@@ -57,6 +57,7 @@ REQUIRED_FILES = (
     "scripts/view_bootstrap_report.py",
     "scripts/test_bootstrap.py",
     "scripts/test_reverse_bootstrap.py",
+    "scripts/test_migrate_knowledge.py",
 )
 AI_DIRECTORIES = (".kiro", ".gemeni", ".claude", ".codex")
 EXCLUDED_DIRECTORY_NAMES = {".git", ".kiro", "__pycache__"}
