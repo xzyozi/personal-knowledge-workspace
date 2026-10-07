@@ -1,27 +1,39 @@
-"""固定HTMLからローカルbootstrapレポートを表示する。"""
+"""固定HTMLからローカルのbootstrap/reverse-bootstrapレポートを表示する。"""
 
 from __future__ import annotations
 
+import argparse
 import functools
 import http.server
 import sys
+import urllib.parse
 import webbrowser
 from pathlib import Path
 
 from bootstrap import BootstrapError, load_settings
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="ローカルのworkspaceレポートを表示する")
+    parser.add_argument(
+        "--report",
+        choices=("bootstrap", "reverse"),
+        default="bootstrap",
+        help="表示するレポートの種類",
+    )
+    args = parser.parse_args(argv)
     try:
         settings = load_settings()
         html_path = settings["report_html"]
+        report_path = settings["report_json"] if args.report == "bootstrap" else settings["reverse_report_json"]
         report_dir = html_path.parent
         if not html_path.is_file():
             raise BootstrapError("configuration_error", f"HTMLレポートがありません: {html_path}")
         handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(report_dir))
         server = http.server.ThreadingHTTPServer(("127.0.0.1", settings["port"]), handler)
-        url = f"http://127.0.0.1:{server.server_port}/{html_path.name}"
-        print(f"Bootstrap report: {url}")
+        query = urllib.parse.urlencode({"report": report_path.name})
+        url = f"http://127.0.0.1:{server.server_port}/{html_path.name}?{query}"
+        print(f"Workspace report: {url}")
         print("停止するにはCtrl+Cを押してください。")
         webbrowser.open(url)
         server.serve_forever()
