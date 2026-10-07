@@ -22,6 +22,7 @@ STANDARD_CONFIG = CONFIG_DIR / "bootstrap.toml"
 LOCAL_CONFIG = CONFIG_DIR / "bootstrap.local.toml"
 LOCAL_EXAMPLE = CONFIG_DIR / "bootstrap.local.example.toml"
 SUPPORTED_SCHEMA_VERSION = 1
+STATE_SCHEMA_VERSION = 1
 FALLBACK_EXIT_CODE = 1
 
 START_MARKER = re.compile(
@@ -168,7 +169,7 @@ def safe_report_path(data: dict[str, Any], key: str) -> Path:
     return ROOT / directory / name
 
 
-def load_settings() -> dict[str, Any]:
+def load_settings(*, create_local_config: bool = True) -> dict[str, Any]:
     standard = read_toml(STANDARD_CONFIG)
     codes = standard.get("exit_codes")
     messages = standard.get("messages")
@@ -198,7 +199,7 @@ def load_settings() -> dict[str, Any]:
         raise BootstrapError("configuration_error", "未対応のschema_versionです")
 
     try:
-        local_created = copy_local_config()
+        local_created = copy_local_config() if create_local_config else False
         local = read_toml(LOCAL_CONFIG)
         effective = merge_local_config(standard, local)
         profile_name = str(effective.get("profile", {}).get("name", standard.get("default_profile", "default")))
@@ -240,7 +241,9 @@ def load_settings() -> dict[str, Any]:
             "target_root": target_root,
             "targets": targets,
             "report_json": safe_report_path(standard, "json"),
+            "reverse_report_json": safe_report_path(standard, "reverse_json"),
             "report_html": safe_report_path(standard, "html"),
+            "state_path": safe_report_path(standard, "state"),
             "port": port,
             "local_created": local_created,
         }
@@ -328,7 +331,7 @@ def make_plan(settings: dict[str, Any]) -> list[PlannedItem]:
             elif updated is not None:
                 plan.append(PlannedItem("skip", report_id, source_name, relative_destination, spec.mode, spec.revision, source_hash, reason, messages.get(reason, "管理ブロックは同一です"), None, existing))
             else:
-                plan.append(PlannedItem("conflict", report_id, source_name, relative_destination, spec.mode, spec.revision, source_hash, reason, messages.get(reason, "管理ブロックを安全に更新できません"), None, existing))
+                plan.append(PlannedItem("conflict", report_id, source_name, relative_destination, spec.mode, spec.revision, source_hash, reason, messages.get(reason, "管理ブロックを安全に更新できません")))
         else:
             plan.append(PlannedItem("conflict", report_id, source_name, relative_destination, spec.mode, spec.revision, source_hash, "unmanaged_existing_file", messages.get("unmanaged_existing_file", "未管理の既存ファイルと衝突しました"), None, existing))
     return plan
@@ -375,6 +378,33 @@ def write_report(settings: dict[str, Any], report: dict[str, Any]) -> None:
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
 
 
+def build_state(settings: dict[str, Any], plan: list[PlannedItem]) -> dict[str, Any]:
+    return {
+        "schema_version": STATE_SCHEMA_VERSION,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "profile": settings["profile"],
+        "applied_files": [
+            {
+                "source": item.source,
+                "destination": item.destination,
+                "mode": item.mode,
+                "revision": item.revision,
+                "sha256": item.source_sha256,
+            }
+            for item in plan
+            if item.action in {"create", "update", "skip"}
+        ],
+    }
+
+
+def write_state(settings: dict[str, Any], plan: list[PlannedItem]) -> None:
+    state_path = settings["state_path"]
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = state_path.with_name(state_path.name + ".pkw-write.tmp")
+    temporary.write_text(json.dumps(build_state(settings, plan), ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+    temporary.replace(state_path)
+
+
 def print_report(settings: dict[str, Any], report: dict[str, Any]) -> None:
     print(f"status: {report['status']}")
     print(f"profile: {report['profile']}")
@@ -401,6 +431,8 @@ def main(argv: list[str] | None = None) -> int:
         if applying:
             apply_plan(settings, plan)
         report = build_report(settings, plan, applying)
+        if applying and report["status"] == "success":
+            write_state(settings, plan)
         write_report(settings, report)
         print_report(settings, report)
         return int(report["exit_code"])

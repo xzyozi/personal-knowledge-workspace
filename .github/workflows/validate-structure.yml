@@ -34,3 +34,6 @@ jobs:
 
       - name: Validate bootstrap fixtures
         run: python scripts/test_bootstrap.py
+
+      - name: Validate reverse-bootstrap fixtures
+        run: python scripts/test_reverse_bootstrap.py

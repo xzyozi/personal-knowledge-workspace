@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Bootstrap Report</title>
+  <title>Workspace Report</title>
   <style>
     :root {
       color-scheme: light dark;
@@ -78,9 +78,15 @@
       color: #1d4ed8;
     }
 
+    .action-delete,
+    .action-delete-candidate,
+    .action-warning {
+      color: #a16207;
+    }
+
     .action-conflict,
     .action-error {
-      color: #b91c1b;
+      color: #b91c1c;
       font-weight: 700;
     }
 
@@ -112,12 +118,14 @@
 
 <body>
   <main>
-    <h1>Bootstrap Report</h1>
+    <h1>Workspace Report</h1>
     <div id="content" class="card">JSONレポートを読み込んでいます...</div>
   </main>
   <script>
     (() => {
       const content = document.getElementById('content');
+      const requestedReport = new URLSearchParams(window.location.search).get('report') || 'bootstrap-report.json';
+      const reportName = /^[A-Za-z0-9._-]+$/.test(requestedReport) ? requestedReport : 'bootstrap-report.json';
       const escapeText = value => String(value ?? '').replace(/[&<>"']/g, character => ({
         '&': '&amp;',
         '<': '&lt;',
@@ -125,7 +133,7 @@
         '"': '&quot;',
         "'": '&#39;'
       })[character]);
-      const safeAction = value => ['create', 'skip', 'update', 'conflict', 'error'].includes(value) ? value : 'error';
+      const safeAction = value => ['create', 'skip', 'update', 'delete', 'delete-candidate', 'warning', 'conflict', 'error'].includes(value) ? value : 'error';
       const statusClass = status => status === 'success' ? 'success' : 'conflict';
       const render = report => {
         const items = Array.isArray(report.items) ? report.items : [];
@@ -139,7 +147,7 @@
         content.innerHTML = `
       <p><span class="status ${statusClass(report.status)}">${escapeText(report.status)}</span></p>
       <p>${escapeText(report.message)}</p>
-      <p class="muted">profile: ${escapeText(report.profile)} / generated: ${escapeText(report.generated_at)}</p>
+      <p class="muted">operation: ${escapeText(report.operation || 'bootstrap')} / profile: ${escapeText(report.profile)} / generated: ${escapeText(report.generated_at)}</p>
       <p class="muted">exit code: ${escapeText(report.exit_code)}</p>
       <table>
         <thead><tr><th>Action</th><th>Destination</th><th>Message</th><th>ID</th></tr></thead>
@@ -148,7 +156,7 @@
       };
       const load = async () => {
         try {
-          const response = await fetch('./bootstrap-report.json?ts=' + Date.now(), { cache: 'no-store' });
+          const response = await fetch('./' + encodeURIComponent(reportName) + '?ts=' + Date.now(), { cache: 'no-store' });
           if (!response.ok) throw new Error('HTTP ' + response.status);
           render(await response.json());
         } catch (error) {

@@ -78,9 +78,27 @@ knowledge/03-output/
 
 補助アダプターは共通入口とナレッジルールへの参照を提供します。ローカル設定、認証情報、セッション状態、個人パスはコミットしません。`.kiro`はプロジェクト自動検知のマーカーには使わず、共有READMEとSteering入口だけをテンプレート管理します。
 
-## 検証
+## Reverse Bootstrap
 
-追加依存関係なしで構造を検証できます。
+bootstrap後にユーザー環境で検証・修正したテンプレートを、リポジトリの作業ツリーへ戻す場合は、default profileの対象だけを扱います。個人fact、private、sources、tasks、largeは標準対象外です。
+
+```powershell
+# dry-run（既定）
+python scripts/reverse_bootstrap.py
+
+# 作業ツリーへ反映
+python scripts/reverse_bootstrap.py --apply --confirm
+
+# レポートを表示
+python scripts/view_bootstrap_report.py --report reverse
+
+# 最終確認
+git status
+git diff
+```
+
+reverse-bootstrapはcommit・pushを行いません。詳細な設計と安全条件は`docs/design/reverse-bootstrap.md`を参照してください。
+
 
 ```powershell
 python scripts/validate_structure.py
