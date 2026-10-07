@@ -53,6 +53,7 @@ REQUIRED_FILES = (
     "scripts/validate_structure.py",
     "scripts/bootstrap.py",
     "scripts/reverse_bootstrap.py",
+    "scripts/migrate_knowledge.py",
     "scripts/view_bootstrap_report.py",
     "scripts/test_bootstrap.py",
     "scripts/test_reverse_bootstrap.py",
