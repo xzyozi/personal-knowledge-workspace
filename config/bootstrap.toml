@@ -30,10 +30,34 @@ directory = "reports"
 html = "bootstrap-report.html"
 json = "bootstrap-report.json"
 reverse_json = "reverse-bootstrap-report.json"
+migrate_json = "migrate-knowledge-report.json"
 state = "bootstrap-state.json"
 
 [report.server]
 port = 8765
+
+[migration]
+# 移行元として指定できない固定の拒否リスト。走査中に見つかった同名ディレクトリも取り込まない。
+deny = [
+  ".ssh",
+  ".aws",
+  ".azure",
+  ".gcloud",
+  ".gnupg",
+  ".docker",
+  ".kube",
+  ".config",
+  ".gemini",
+  ".gemeni",
+  ".claude",
+  ".codex",
+  ".kiro",
+  ".git",
+  "AppData",
+  "node_modules",
+  "__pycache__",
+  ".venv",
+]
 
 [profiles.default]
 description = "共有入口、ナレッジ索引、共通ルール"

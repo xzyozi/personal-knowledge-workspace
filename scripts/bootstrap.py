@@ -104,7 +104,7 @@ def copy_local_config() -> bool:
 
 
 def merge_local_config(standard: dict[str, Any], local: dict[str, Any]) -> dict[str, Any]:
-    allowed = {"profile", "target", "storage", "report"}
+    allowed = {"profile", "target", "storage", "report", "migration"}
     unknown = set(local) - allowed
     if unknown:
         raise BootstrapError("configuration_error", f"local設定に許可されない項目があります: {sorted(unknown)}")
@@ -130,6 +130,15 @@ def merge_local_config(standard: dict[str, Any], local: dict[str, Any]) -> dict[
         if set(report) - {"server"} or set(report.get("server", {})) - {"port"}:
             raise BootstrapError("configuration_error", "local設定のreportはserver.portだけ指定できます")
         result.setdefault("report", {}).setdefault("server", {}).update(report.get("server", {}))
+
+    migration = local.get("migration", {})
+    if migration:
+        if set(migration) - {"sources"}:
+            raise BootstrapError("configuration_error", "local設定のmigrationはsourcesだけ指定できます")
+        sources = migration.get("sources", [])
+        if not isinstance(sources, list) or not all(isinstance(value, str) for value in sources):
+            raise BootstrapError("configuration_error", "migration.sourcesは文字列の配列で指定してください")
+        result.setdefault("migration", {})["sources"] = list(sources)
     return result
 
 
@@ -233,6 +242,12 @@ def load_settings(*, create_local_config: bool = True) -> dict[str, Any]:
         port = int(effective.get("report", {}).get("server", {}).get("port", 8765))
         if not 1 <= port <= 65535:
             raise BootstrapError("configuration_error", "report.server.portは1から65535で指定してください")
+        migration_data = effective.get("migration", {})
+        migration_deny = migration_data.get("deny", [])
+        migration_sources = migration_data.get("sources", [])
+        for label, values in (("deny", migration_deny), ("sources", migration_sources)):
+            if not isinstance(values, list) or not all(isinstance(value, str) for value in values):
+                raise BootstrapError("configuration_error", f"migration.{label}は文字列の配列で指定してください")
         return {
             "data": effective,
             "codes": {str(k): int(v) for k, v in codes.items()},
@@ -242,6 +257,8 @@ def load_settings(*, create_local_config: bool = True) -> dict[str, Any]:
             "targets": targets,
             "report_json": safe_report_path(standard, "json"),
             "reverse_report_json": safe_report_path(standard, "reverse_json"),
+            "migrate_report_json": safe_report_path(standard, "migrate_json"),
+            "migration": {"sources": list(migration_sources), "deny": list(migration_deny)},
             "report_html": safe_report_path(standard, "html"),
             "state_path": safe_report_path(standard, "state"),
             "port": port,
