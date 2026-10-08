@@ -221,6 +221,7 @@ def resolve_sources(settings: dict[str, Any]) -> list[SourceRoot]:
     denied = deny_set(settings)
     home = Path.home().resolve()
     target_root = settings["target_root"]
+    protected_areas = (target_root / INBOX, target_root / LARGE_MANIFEST.parent)
     sources: list[SourceRoot] = []
     for raw in raw_sources:
         relative = check_item_path(raw, "migration.sources")
@@ -236,8 +237,9 @@ def resolve_sources(settings: dict[str, Any]) -> list[SourceRoot]:
         if home not in resolved.parents:
             raise MigrationError("safety_error", "ホーム外を指す移行元は指定できません")
         reject_denied(resolved.relative_to(home).parts, denied)
-        if resolved == target_root or resolved in target_root.parents or target_root in resolved.parents:
-            raise MigrationError("safety_error", "取り込み先と重なる移行元は指定できません")
+        for area in protected_areas:
+            if resolved == area or resolved in area.parents or area in resolved.parents:
+                raise MigrationError("safety_error", "取り込み先と重なる移行元は指定できません")
         label = make_label(relative)
         for existing in sources:
             if (
