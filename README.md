@@ -145,7 +145,7 @@ python scripts/view_bootstrap_report.py --report migrate
 | テキスト | 作業区切りごとに個人リポジトリへcommit、週1回push           |
 | バイナリ | 追加したタイミングで外部ストレージへコピー、月1回`--verify` |
 
-詳細な設計と安全条件は`docs/design/migrate-knowledge.md`を参照してください。
+詳細な設計と安全条件は`docs/design/migrate-knowledge.md`を参照してください。パスの扱いと未検証の制約は`docs/design/path-design.md`を参照してください。
 
 ## 個人側の骨格の初期設定
 
