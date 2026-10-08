@@ -10,7 +10,7 @@
 - `test_reverse_bootstrap.py`: 一時fixtureだけを使うreverse-bootstrap検証
 - `test_migrate_knowledge.py`: 一時fixtureだけを使う移行検証
 - `test_validate_structure.py`: 共有エージェント・Skillの検査を、一時ツリーで検証する
-- `validate_structure.py`: リポジトリ構造検証
+- `validate_structure.py`: リポジトリ構造、共有エージェント・Skill、ツール別の入口、Markdownの書式の検証（詳細はルートの`README.md`の「検証」）
 
 ## Bootstrap
 
