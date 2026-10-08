@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import sys
+import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -280,12 +281,95 @@ def check_shared_definitions(errors: list[str], root: Path = ROOT) -> None:
                 errors.append(f"entry does not reference agent {reference}: {entry}")
 
 
+MANAGED_START = re.compile(r'<!--\s*pkw:managed:start\s+id="([^"]+)"')
+MANAGED_END = re.compile(r'<!--\s*pkw:managed:end\s+id="([^"]+)"')
+IMPORT_LINE = re.compile(r"^@(\S+)\s*$", re.MULTILINE)
+FILE_REFERENCE_LINE = re.compile(r"^#\[\[file:", re.MULTILINE)
+GLOBAL_STEERING = ".kiro/steering/knowledge-entry.md"
+LEGACY_NAME = "gem" + "eni"
+LEGACY_CHECK_FILES = ("AGENTS.md", "README.md", "PROJECT.md", ".gitignore", "config/bootstrap.toml")
+LEGACY_CHECK_DIRECTORIES = ("knowledge/00-rules", ".claude", ".codex", ".gemini")
+
+
+def read_text(path: Path) -> str | None:
+    try:
+        return path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return None
+
+
+def check_global_entries(errors: list[str], root: Path = ROOT) -> None:
+    """ツール別のグローバル入口が、AGENTS.mdへ正しく辿れることを検査する。"""
+    config_text = read_text(root / "config" / "bootstrap.toml")
+    if config_text is None:
+        errors.append("config/bootstrap.toml is unreadable")
+        return
+    try:
+        config = tomllib.loads(config_text)
+    except tomllib.TOMLDecodeError:
+        errors.append("config/bootstrap.toml is not valid TOML")
+        return
+    targets = config.get("profiles", {}).get("default", {}).get("targets", [])
+    if not isinstance(targets, list):
+        errors.append("default profile targets must be a list")
+        return
+    agents = (root / "AGENTS.md").resolve()
+    for target in targets:
+        if not isinstance(target, dict) or target.get("mode") != "managed-block":
+            continue
+        target_id = str(target.get("id", ""))
+        source = str(target.get("source", ""))
+        path = root / source
+        text = read_text(path) if path.is_file() else None
+        if text is None:
+            errors.append(f"managed-block source is missing or unreadable: {source}")
+            continue
+        starts = [match.group(1) for match in MANAGED_START.finditer(text)]
+        ends = [match.group(1) for match in MANAGED_END.finditer(text)]
+        if starts != [target_id] or ends != [target_id]:
+            errors.append(f"managed block id must match target id {target_id}: {source}")
+            continue
+        if "AGENTS.md" not in text:
+            errors.append(f"managed block must point to AGENTS.md: {source}")
+        for match in IMPORT_LINE.finditer(text):
+            resolved = (path.parent / match.group(1)).resolve()
+            if not resolved.is_file():
+                errors.append(f"managed block import does not resolve: {match.group(1)} in {source}")
+            elif resolved != agents:
+                errors.append(f"managed block import must resolve to AGENTS.md: {match.group(1)} in {source}")
+
+    steering = root / GLOBAL_STEERING
+    steering_text = read_text(steering) if steering.is_file() else None
+    if steering_text is None:
+        errors.append(f"global steering is missing or unreadable: {GLOBAL_STEERING}")
+        return
+    if FILE_REFERENCE_LINE.search(steering_text):
+        errors.append(f"global steering must not use file references: {GLOBAL_STEERING}")
+    if "AGENTS.md" not in steering_text:
+        errors.append(f"global steering must point to AGENTS.md: {GLOBAL_STEERING}")
+
+
+def check_legacy_names(errors: list[str], root: Path = ROOT) -> None:
+    """改名前の表記が、管理対象のファイルへ再び混入していないことを検査する。"""
+    paths = [root / name for name in LEGACY_CHECK_FILES]
+    for directory in LEGACY_CHECK_DIRECTORIES:
+        base = root / directory
+        if base.is_dir():
+            paths.extend(sorted(path for path in base.rglob("*.md") if path.is_file()))
+    for path in paths:
+        text = read_text(path) if path.is_file() else None
+        if text is not None and LEGACY_NAME in text:
+            errors.append(f"legacy name remains: {path.relative_to(root).as_posix()}")
+
+
 def main() -> int:
     errors: list[str] = []
     check_required_paths(errors)
     check_ai_directories(errors)
     check_sensitive_names(errors)
     check_shared_definitions(errors)
+    check_global_entries(errors)
+    check_legacy_names(errors)
     if errors:
         print("Structure validation failed:", file=sys.stderr)
         for error in errors:
