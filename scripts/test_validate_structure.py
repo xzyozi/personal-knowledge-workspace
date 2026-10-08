@@ -89,6 +89,25 @@ def assert_entry_reports(root: Path, fragment: str) -> None:
     assert any(fragment in error for error in errors), (fragment, errors)
 
 
+FENCE = "`" * 3
+
+
+def write_bytes(path: Path, data: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
+
+
+def run_hygiene(root: Path) -> list[str]:
+    errors: list[str] = []
+    checker.check_markdown_hygiene(errors, root)
+    return errors
+
+
+def assert_hygiene_reports(root: Path, fragment: str) -> None:
+    errors = run_hygiene(root)
+    assert any(fragment in error for error in errors), (fragment, errors)
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="pkw-validate-") as directory:
         base = Path(directory)
@@ -181,6 +200,50 @@ def main() -> int:
         legacy_errors: list[str] = []
         checker.check_legacy_names(legacy_errors, legacy)
         assert any("legacy name remains" in error for error in legacy_errors), legacy_errors
+
+        clean = base / "hygiene-clean"
+        write(clean / "docs" / "b.md", "# b\n")
+        write(
+            clean / "docs" / "a.md",
+            "# a\n\n"
+            "[b](./b.md) [b with anchor](./b.md#section) [web](https://example.com/x) [anchor](#top)\n\n"
+            "`[inline](./missing.md)`\n\n"
+            + FENCE + "markdown\n[example](./missing.md)\n" + FENCE + "\n",
+        )
+        assert run_hygiene(clean) == [], run_hygiene(clean)
+
+        unclosed = base / "hygiene-unclosed"
+        write(unclosed / "a.md", "# a\n\n" + FENCE + "text\nno end\n")
+        assert_hygiene_reports(unclosed, "unclosed code fence")
+
+        tab = base / "hygiene-tab"
+        write(tab / "a.md", "# a\n\n\tindented with a tab\n")
+        assert_hygiene_reports(tab, "tab characters")
+
+        windows_path = base / "hygiene-windows-path"
+        write(windows_path / "a.md", "# a\n\nsee C:\\Users\\someone\\notes\n")
+        assert_hygiene_reports(windows_path, "absolute path")
+
+        unix_path = base / "hygiene-unix-path"
+        write(unix_path / "a.md", "# a\n\nsee /home/someone/notes\n")
+        assert_hygiene_reports(unix_path, "absolute path")
+
+        broken_link = base / "hygiene-broken-link"
+        write(broken_link / "a.md", "# a\n\n[missing](./missing.md)\n")
+        assert_hygiene_reports(broken_link, "link is broken")
+
+        crlf = base / "hygiene-crlf"
+        write_bytes(crlf / "a.md", b"# a\r\n\r\ntext\r\n")
+        assert_hygiene_reports(crlf, "LF line endings")
+
+        not_utf8 = base / "hygiene-not-utf8"
+        write_bytes(not_utf8 / "a.md", b"\xff\xfe\x00")
+        assert_hygiene_reports(not_utf8, "not UTF-8")
+
+        excluded = base / "hygiene-excluded"
+        for excluded_directory in ("knowledge/04-sources", "knowledge/01-private", "knowledge/06-large"):
+            write(excluded / excluded_directory / "raw.md", "\tC:\\Users\\someone\n[missing](./missing.md)\n" + FENCE + "\n")
+        assert run_hygiene(excluded) == [], run_hygiene(excluded)
 
     print("validate_structure shared definition checks passed")
     return 0
