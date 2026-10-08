@@ -213,7 +213,7 @@ def assert_managed_block_is_excluded(root: Path) -> None:
 
 
 def main() -> int:
-    with tempfile.TemporaryDirectory(prefix="pkw-reverse-bootstrap-") as directory:
+    with tempfile.TemporaryDirectory(prefix="pkw-reverse-bootstrap 日本語 ") as directory:
         root = Path(directory)
         assert_dry_run_and_apply(root)
         assert_new_file_is_reversed(root)

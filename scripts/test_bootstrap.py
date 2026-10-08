@@ -264,7 +264,7 @@ def assert_home_target_case(root: Path) -> None:
 
 
 def main() -> int:
-    with tempfile.TemporaryDirectory(prefix="pkw-bootstrap-") as directory:
+    with tempfile.TemporaryDirectory(prefix="pkw-bootstrap 日本語 ") as directory:
         root = Path(directory)
         assert_success_case(root)
         assert_conflict_case(root)

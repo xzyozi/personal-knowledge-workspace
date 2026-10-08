@@ -232,7 +232,7 @@ def assert_home_target_migration(root: Path) -> None:
 
 
 def main() -> int:
-    with tempfile.TemporaryDirectory(prefix="pkw-migrate-knowledge-") as directory:
+    with tempfile.TemporaryDirectory(prefix="pkw-migrate-knowledge 日本語 ") as directory:
         root = Path(directory)
         assert_dry_run_apply_and_verify(root)
         assert_home_target_migration(root)

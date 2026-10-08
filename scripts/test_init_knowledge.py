@@ -83,7 +83,7 @@ def allowlist() -> list[str]:
 
 def main() -> int:
     expected = allowlist()
-    with tempfile.TemporaryDirectory(prefix="pkw-init-") as directory:
+    with tempfile.TemporaryDirectory(prefix="pkw-init 日本語 ") as directory:
         root = Path(directory)
 
         worktree, home, target = prepare_fixture(root, "dry-run")
