@@ -8,7 +8,7 @@
 - Johnny.Decimalの考え方で、情報の場所を固定する
 - 定周期で作業の観測記録を保存する
 - 必要な事実だけをAIに読ませ、全体の一括読み込みを避ける
-- `GEMINI.md` と `.kiro`、`.gemeni`、`.claude`、`.codex` のAIツール連携を同居させる
+- `GEMINI.md` と `.kiro`、`.gemini`、`.claude`、`.codex` のAIツール連携を同居させる
 - プロジェクトの現在状態と実装仕様を別々に管理する
 
 ## 基本構成
@@ -33,7 +33,7 @@
 ├─ templates/
 ├─ .kiro/
 │  └─ steering/
-├─ .gemeni/
+├─ .gemini/
 ├─ .claude/
 ├─ .codex/
 └─ .github/workflows/
@@ -65,14 +65,24 @@ knowledge/03-output/
 
 ### 自動入口
 
-- `AGENTS.md`: Claude Code、Codex、共通入口
-- `GEMINI.md`: Gemini CLI
+- `AGENTS.md`: 共通入口
+- `GEMINI.md`: Gemini CLI（このリポジトリで作業する時）
 - `.kiro/steering/knowledge-entry.md`: Kiro
+
+### ツール別のグローバル入口
+
+ホームへ配布すると、各ツールがグローバル設定として読むファイルです。どれも `AGENTS.md` への薄い参照です。
+
+- `.claude/CLAUDE.md`: Claude Code（`~/.claude/CLAUDE.md`）
+- `.codex/AGENTS.md`: Codex（`~/.codex/AGENTS.md`）
+- `.gemini/GEMINI.md`: Gemini CLI（`~/.gemini/GEMINI.md`）
+
+これらは管理ブロックで囲まれており、ファイルがすでにある場合は末尾に追記し、利用者の記述は変更しません。
 
 ### 補助アダプター
 
 - `.kiro/`
-- `.gemeni/`
+- `.gemini/`
 - `.claude/`
 - `.codex/`
 

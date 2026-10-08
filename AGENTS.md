@@ -19,7 +19,7 @@
 - 原本と成果物を事実として混同しない。
 - `.kiro` はプロジェクト自動検知のマーカーとして扱わない。共有テンプレートのREADMEとSteering入口だけを対象にする。
 - `.kiro` のローカルspec、hook、lesson、stateは自動的に読まない。
-- `.gemeni`、`.claude`、`.codex` は、該当するAIツールの作業時だけ対象にする。
+- `.gemini`、`.claude`、`.codex` は、該当するAIツールの作業時だけ対象にする。
 
 ## 書き込みルール
 
@@ -38,4 +38,4 @@
 - 共有エージェント: `knowledge/00-rules/agents/pkw-knowledge-steward.md`
 - Gemini CLI入口: `GEMINI.md`
 - Kiro入口: `.kiro/README.md`、`.kiro/steering/knowledge-entry.md`
-- その他のAIツール入口: `.gemeni/README.md`、`.gemeni/knowledge-entry.md`、`.claude/README.md`、`.claude/knowledge-entry.md`、`.codex/README.md`、`.codex/knowledge-entry.md`
+- ツール別のグローバル入口（`AGENTS.md` への薄い参照）: `.claude/CLAUDE.md`、`.codex/AGENTS.md`、`.gemini/GEMINI.md`

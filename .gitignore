@@ -234,17 +234,17 @@ __marimo__/
 !/knowledge/06-large/README.md
 
 # Local AI tool state and secrets; keep only safe documentation/templates
-/.gemeni/*
-!/.gemeni/README.md
-!/.gemeni/knowledge-entry.md
-!/.gemeni/*.example
+/.gemini/*
+!/.gemini/README.md
+!/.gemini/GEMINI.md
+!/.gemini/*.example
 /.claude/*
 !/.claude/README.md
-!/.claude/knowledge-entry.md
+!/.claude/CLAUDE.md
 !/.claude/*.example
 /.codex/*
 !/.codex/README.md
-!/.codex/knowledge-entry.md
+!/.codex/AGENTS.md
 !/.codex/*.example
 
 # Bootstrap local configuration and runtime report

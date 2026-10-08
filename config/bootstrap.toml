@@ -53,7 +53,6 @@ deny = [
   ".kube",
   ".config",
   ".gemini",
-  ".gemeni",
   ".claude",
   ".codex",
   ".kiro",
@@ -96,17 +95,17 @@ mode = "update-if-unmodified"
 revision = 1
 
 [[profiles.default.targets]]
-id = "gemeni-readme"
-source = ".gemeni/README.md"
-destination = ".gemeni/README.md"
+id = "gemini-readme"
+source = ".gemini/README.md"
+destination = ".gemini/README.md"
 mode = "update-if-unmodified"
 revision = 1
 
 [[profiles.default.targets]]
-id = "gemeni-knowledge-entry"
-source = ".gemeni/knowledge-entry.md"
-destination = ".gemeni/knowledge-entry.md"
-mode = "update-if-unmodified"
+id = "gemini-global-entry"
+source = ".gemini/GEMINI.md"
+destination = ".gemini/GEMINI.md"
+mode = "managed-block"
 revision = 1
 
 [[profiles.default.targets]]
@@ -117,10 +116,10 @@ mode = "update-if-unmodified"
 revision = 1
 
 [[profiles.default.targets]]
-id = "claude-knowledge-entry"
-source = ".claude/knowledge-entry.md"
-destination = ".claude/knowledge-entry.md"
-mode = "update-if-unmodified"
+id = "claude-entry"
+source = ".claude/CLAUDE.md"
+destination = ".claude/CLAUDE.md"
+mode = "managed-block"
 revision = 1
 
 [[profiles.default.targets]]
@@ -131,10 +130,10 @@ mode = "update-if-unmodified"
 revision = 1
 
 [[profiles.default.targets]]
-id = "codex-knowledge-entry"
-source = ".codex/knowledge-entry.md"
-destination = ".codex/knowledge-entry.md"
-mode = "update-if-unmodified"
+id = "codex-entry"
+source = ".codex/AGENTS.md"
+destination = ".codex/AGENTS.md"
+mode = "managed-block"
 revision = 1
 
 [[profiles.default.targets]]

@@ -1,8 +1,12 @@
 # .claude
 
-Claude系ツールの共有可能な入口・テンプレートを置くためのディレクトリです。
+Claude Codeの共有可能な入口・テンプレートを置くためのディレクトリです。
 
 共通ルールの正本はルートの `AGENTS.md` と `knowledge/00-rules/` に置き、このディレクトリへ全文を重複させません。認証情報、ローカル設定、セッション状態はコミットしません。
+
+## 入口
+
+- [CLAUDE.md](./CLAUDE.md): `AGENTS.md` を取り込む薄い参照です。管理ブロックで囲まれており、ホームの `~/.claude/CLAUDE.md` に配布されます。ファイルがすでにある場合は、末尾に追記し、利用者の記述は変更しません。
 
 ## 共通参照入口
 
@@ -11,4 +15,3 @@ Claude系ツールの共有可能な入口・テンプレートを置くため�
 - [読み取りルール](../knowledge/00-rules/00.02-read-policy.md)
 - [書き込みルール](../knowledge/00-rules/00.03-write-policy.md)
 - [共有エージェント](../knowledge/00-rules/agents/pkw-knowledge-steward.md)
-- [このツール用の参照入口](./knowledge-entry.md)

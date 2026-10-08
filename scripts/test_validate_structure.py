@@ -51,6 +51,44 @@ def assert_reports(root: Path, fragment: str) -> None:
     assert any(fragment in error for error in errors), (fragment, errors)
 
 
+ENTRY_CONFIG = (
+    "[profiles.default]\n"
+    'description = "fixture"\n\n'
+    "[[profiles.default.targets]]\n"
+    'id = "claude-entry"\n'
+    'source = ".claude/CLAUDE.md"\n'
+    'destination = ".claude/CLAUDE.md"\n'
+    'mode = "managed-block"\n'
+    "revision = 1\n"
+)
+
+
+def managed(entry_id: str, body: str) -> str:
+    return (
+        f'<!-- pkw:managed:start id="{entry_id}" revision="1" -->\n'
+        f"{body}"
+        f'<!-- pkw:managed:end id="{entry_id}" -->\n'
+    )
+
+
+def make_entry_tree(root: Path) -> None:
+    write(root / "AGENTS.md", "# AGENTS\n")
+    write(root / "config" / "bootstrap.toml", ENTRY_CONFIG)
+    write(root / ".claude" / "CLAUDE.md", managed("claude-entry", "see AGENTS.md\n@../AGENTS.md\n"))
+    write(root / checker.GLOBAL_STEERING, "---\ninclusion: always\n---\n\nRead AGENTS.md first.\n")
+
+
+def run_entries(root: Path) -> list[str]:
+    errors: list[str] = []
+    checker.check_global_entries(errors, root)
+    return errors
+
+
+def assert_entry_reports(root: Path, fragment: str) -> None:
+    errors = run_entries(root)
+    assert any(fragment in error for error in errors), (fragment, errors)
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="pkw-validate-") as directory:
         base = Path(directory)
@@ -104,8 +142,45 @@ def main() -> int:
 
         missing_reference = base / "missing-reference"
         make_tree(missing_reference)
-        write(missing_reference / ".claude/knowledge-entry.md", "no reference here\n")
+        write(missing_reference / "GEMINI.md", "no reference here\n")
         assert_reports(missing_reference, "entry does not reference agent")
+
+        entries = base / "entries"
+        make_entry_tree(entries)
+        assert run_entries(entries) == [], run_entries(entries)
+
+        missing_import = base / "missing-import"
+        make_entry_tree(missing_import)
+        write(missing_import / ".claude" / "CLAUDE.md", managed("claude-entry", "AGENTS.md\n@../MISSING.md\n"))
+        assert_entry_reports(missing_import, "import does not resolve")
+
+        other_import = base / "other-import"
+        make_entry_tree(other_import)
+        write(other_import / "OTHER.md", "# other\n")
+        write(other_import / ".claude" / "CLAUDE.md", managed("claude-entry", "AGENTS.md\n@../OTHER.md\n"))
+        assert_entry_reports(other_import, "must resolve to AGENTS.md")
+
+        wrong_id = base / "wrong-id"
+        make_entry_tree(wrong_id)
+        write(wrong_id / ".claude" / "CLAUDE.md", managed("wrong", "AGENTS.md\n@../AGENTS.md\n"))
+        assert_entry_reports(wrong_id, "must match target id")
+
+        no_marker = base / "no-marker"
+        make_entry_tree(no_marker)
+        write(no_marker / ".claude" / "CLAUDE.md", "AGENTS.md\n@../AGENTS.md\n")
+        assert_entry_reports(no_marker, "must match target id")
+
+        steering_reference = base / "steering-reference"
+        make_entry_tree(steering_reference)
+        write(steering_reference / checker.GLOBAL_STEERING, "---\ninclusion: always\n---\n\n#[[file:../../AGENTS.md]]\n")
+        assert_entry_reports(steering_reference, "must not use file references")
+
+        legacy = base / "legacy"
+        make_entry_tree(legacy)
+        write(legacy / "AGENTS.md", "# AGENTS\n" + checker.LEGACY_NAME + "\n")
+        legacy_errors: list[str] = []
+        checker.check_legacy_names(legacy_errors, legacy)
+        assert any("legacy name remains" in error for error in legacy_errors), legacy_errors
 
     print("validate_structure shared definition checks passed")
     return 0
