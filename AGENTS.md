@@ -4,11 +4,11 @@
 
 ## 作業開始時
 
-1. `PROJECT.md` で目的・状態・対象範囲を確認する。
+1. 作業中のプロジェクトのディレクトリに `PROJECT.md` があれば、目的・状態・対象範囲を確認する。なければ `knowledge/projects/INDEX.md` で該当プロジェクトを確認する。
 2. `knowledge/INDEX.md` と `knowledge/00-rules/` を確認する。
 3. 共有エージェント `knowledge/00-rules/agents/pkw-knowledge-steward.md` を確認し、現在の作業に該当するSkillだけを読む。
 4. 現在の作業に直接関係する `knowledge/02-facts/` だけを選択的に読む。
-5. 必要な場合だけ `knowledge/04-sources/`、`knowledge/05-tasks/`、`projects/` を読む。
+5. 必要な場合だけ `knowledge/04-sources/`、`knowledge/05-tasks/`、`knowledge/projects/` を読む。
 
 ## 読み取りルール
 
@@ -33,7 +33,7 @@
 ## 正本
 
 - 共通入口: `AGENTS.md`
-- プロジェクト状態: `PROJECT.md`
+- プロジェクト状態: 各プロジェクトの `PROJECT.md`、一覧は `knowledge/projects/INDEX.md`
 - ナレッジ運用: `knowledge/00-rules/`
 - 共有エージェント: `knowledge/00-rules/agents/pkw-knowledge-steward.md`
 - Gemini CLI入口: `GEMINI.md`

@@ -14,7 +14,7 @@
 - Johnny.Decimal風の番号付きサブフォルダ
 - `04-sources` への定周期キャプチャ
 - `02-facts` への検証済み事実の昇格
-- `PROJECT.md` と `projects/` によるプロジェクト管理
+- `PROJECT.md` と `knowledge/projects/INDEX.md` によるプロジェクト管理
 - `GEMINI.md` によるGemini CLI入口
 - `.kiro`、`.gemini`、`.claude`、`.codex` のAIツール連携
 
@@ -38,7 +38,7 @@
 | 生成成果物             | `knowledge/03-output/`                      |
 | 原本・定期記録         | `knowledge/04-sources/`                     |
 | タスク・次のアクション | `knowledge/05-tasks/`                       |
-| プロジェクト一覧       | `projects/`                                 |
+| プロジェクト一覧       | `knowledge/projects/INDEX.md`               |
 | 決定的な処理           | `scripts/`                                  |
 | Gemini CLIの自動入口   | `GEMINI.md`                                 |
 | AIツール固有の入口     | `.kiro/`, `.gemini/`, `.claude/`, `.codex/` |

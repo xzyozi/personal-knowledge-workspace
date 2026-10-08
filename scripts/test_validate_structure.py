@@ -245,6 +245,32 @@ def main() -> int:
             write(excluded / excluded_directory / "raw.md", "\tC:\\Users\\someone\n[missing](./missing.md)\n" + FENCE + "\n")
         assert run_hygiene(excluded) == [], run_hygiene(excluded)
 
+        header = "## Projects\n\n| name | 状態 | 概要 | 次のアクション | リポジトリ | 最終確認日 |\n|---|---|---|---|---|---|\n"
+        good_row = "| my-app | active | 概要 | 次 | owner/repo | 2026-10-07 |\n"
+
+        def index_errors(name: str, rows: str) -> list[str]:
+            tree = base / name
+            write(tree / checker.PROJECTS_INDEX, "# Projects Index\n\n" + header + rows)
+            errors: list[str] = []
+            checker.check_projects_index(errors, tree)
+            return errors
+
+        assert index_errors("idx-empty", "") == []
+        assert index_errors("idx-good", good_row + "| other-app | paused | a | b | - | - |\n") == []
+        assert index_errors("idx-url", "| my-app | active | a | b | https://example.com/o/r.git | 2026-10-07 |\n") == []
+        for case, rows, fragment in (
+            ("idx-dup", good_row + good_row, "duplicated"),
+            ("idx-name", "| My_App | active | a | b | - | - |\n", "kebab-case"),
+            ("idx-number", "| 01 app | active | a | b | - | - |\n", "kebab-case"),
+            ("idx-status", "| my-app | busy | a | b | - | - |\n", "status is invalid"),
+            ("idx-cred", "| my-app | active | a | b | https://user:pass@example.com/o/r | - |\n", "credentials"),
+            ("idx-path", "| my-app | active | a | b | C:/work/app | - |\n", "owner/repo"),
+            ("idx-date", "| my-app | active | a | b | - | 2026/10/07 |\n", "YYYY-MM-DD"),
+            ("idx-cols", "| my-app | active | a |\n", "6 columns"),
+        ):
+            found = index_errors(case, rows)
+            assert any(fragment in error for error in found), (case, found)
+
     print("validate_structure shared definition checks passed")
     return 0
 
