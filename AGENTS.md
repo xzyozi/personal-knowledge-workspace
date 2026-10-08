@@ -38,4 +38,4 @@
 - 共有エージェント: `knowledge/00-rules/agents/pkw-knowledge-steward.md`
 - Gemini CLI入口: `GEMINI.md`
 - Kiro入口: `.kiro/README.md`、`.kiro/steering/knowledge-entry.md`
-- その他のAIツール入口: `.gemini/README.md`、`.gemini/knowledge-entry.md`、`.claude/README.md`、`.claude/knowledge-entry.md`、`.codex/README.md`、`.codex/knowledge-entry.md`
+- ツール別のグローバル入口（`AGENTS.md` への薄い参照）: `.claude/CLAUDE.md`、`.codex/AGENTS.md`、`.gemini/GEMINI.md`

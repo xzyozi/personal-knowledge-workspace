@@ -65,9 +65,19 @@ knowledge/03-output/
 
 ### 自動入口
 
-- `AGENTS.md`: Claude Code、Codex、共通入口
-- `GEMINI.md`: Gemini CLI
+- `AGENTS.md`: 共通入口
+- `GEMINI.md`: Gemini CLI（このリポジトリで作業する時）
 - `.kiro/steering/knowledge-entry.md`: Kiro
+
+### ツール別のグローバル入口
+
+ホームへ配布すると、各ツールがグローバル設定として読むファイルです。どれも `AGENTS.md` への薄い参照です。
+
+- `.claude/CLAUDE.md`: Claude Code（`~/.claude/CLAUDE.md`）
+- `.codex/AGENTS.md`: Codex（`~/.codex/AGENTS.md`）
+- `.gemini/GEMINI.md`: Gemini CLI（`~/.gemini/GEMINI.md`）
+
+これらは管理ブロックで囲まれており、ファイルがすでにある場合は末尾に追記し、利用者の記述は変更しません。
 
 ### 補助アダプター
 
