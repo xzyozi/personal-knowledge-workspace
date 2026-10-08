@@ -4,10 +4,8 @@ inclusion: always
 
 # Kiro Universal Knowledge Entry
 
-Kiro用の薄い共有アダプターです。ルール本文をここへ複製せず、リポジトリ共通の入口とナレッジルールを参照します。
+Kiro用の薄い共有アダプターです。ルール本文をここへ複製しません。
 
-#[[file:../../AGENTS.md]]
-#[[file:../../knowledge/INDEX.md]]
-#[[file:../../knowledge/00-rules/00.02-read-policy.md]]
-#[[file:../../knowledge/00-rules/00.03-write-policy.md]]
-#[[file:../../knowledge/00-rules/agents/pkw-knowledge-steward.md]]
+作業開始時に、このファイルの2つ上のディレクトリにある `AGENTS.md`（グローバルsteeringの場合は `~/AGENTS.md`）を読み、その手順に従ってください。
+
+グローバルsteeringは、置き場の外にあるファイルを `#[[file:...]]` で参照できないため、この記法は使いません。

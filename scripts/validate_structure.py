@@ -43,9 +43,9 @@ REQUIRED_FILES = (
     "docs/design/shared-agents.md",
     "reports/bootstrap-report.html",
     "reports/README.md",
-    ".gemini/knowledge-entry.md",
-    ".claude/knowledge-entry.md",
-    ".codex/knowledge-entry.md",
+    ".gemini/GEMINI.md",
+    ".claude/CLAUDE.md",
+    ".codex/AGENTS.md",
     "knowledge/INDEX.md",
     "knowledge/00-rules/00.01-entry-rule.md",
     "knowledge/00-rules/00.02-read-policy.md",
@@ -124,10 +124,6 @@ SKILL_DIRECTORY = "knowledge/00-rules/skills"
 ENTRY_FILES = (
     "AGENTS.md",
     "GEMINI.md",
-    ".kiro/steering/knowledge-entry.md",
-    ".gemini/knowledge-entry.md",
-    ".claude/knowledge-entry.md",
-    ".codex/knowledge-entry.md",
 )
 SHARED_NAME = re.compile(r"^pkw-[a-z0-9]+(?:-[a-z0-9]+)*$")
 FRONTMATTER_KEYS = frozenset({"name", "description"})
