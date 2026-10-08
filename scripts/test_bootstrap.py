@@ -148,6 +148,88 @@ def assert_update_case(root: Path) -> None:
     assert b"template update 2" not in deployed.read_bytes()
 
 
+def managed_source(body: str) -> str:
+    return (
+        "# Fixture entry\n\n"
+        '<!-- pkw:managed:start id="fixture-managed" revision="1" -->\n'
+        f"{body}"
+        '<!-- pkw:managed:end id="fixture-managed" -->\n'
+    )
+
+
+def add_managed_target(worktree: Path) -> None:
+    config = worktree / "config" / "bootstrap.toml"
+    text = config.read_text(encoding="utf-8")
+    target = (
+        "[[profiles.default.targets]]\n"
+        'id = "fixture-managed"\n'
+        'source = "fixture-managed.md"\n'
+        'destination = "fixture-managed.md"\n'
+        'mode = "managed-block"\n'
+        "revision = 1\n\n"
+    )
+    assert "[profiles.personal]" in text
+    config.write_text(text.replace("[profiles.personal]", target + "[profiles.personal]", 1), encoding="utf-8", newline="\n")
+
+
+def assert_managed_block_case(root: Path) -> None:
+    worktree = prepare_worktree(root, "managed-worktree")
+    add_managed_target(worktree)
+    source = worktree / "fixture-managed.md"
+    target = root / "managed-target"
+    target.mkdir()
+    write_local_config(worktree, target)
+    deployed = target / "fixture-managed.md"
+
+    # 利用者のファイルがあり、管理ブロックがない: 末尾へ追記する。dry-runでは変更しない
+    user_text = "# My notes\n\nmy own text\n"
+    deployed.write_text(user_text, encoding="utf-8", newline="\n")
+    source.write_text(managed_source("managed body v1\n"), encoding="utf-8", newline="\n")
+    dry_run = run_bootstrap(worktree)
+    assert dry_run.returncode == 0, dry_run.stderr
+    assert deployed.read_text(encoding="utf-8") == user_text, "dry-run must not append"
+    appended = run_bootstrap(worktree, "--apply", "--confirm")
+    assert appended.returncode == 0, appended.stderr
+    content = deployed.read_text(encoding="utf-8")
+    assert content.startswith(user_text + "\n"), "user text must stay, followed by a blank line"
+    assert "managed body v1" in content
+    assert 'sha256="' in content, "the deployed marker must record the body hash"
+    assert content.count("pkw:managed:start") == 1
+
+    # テンプレートのブロックを更新: 利用者の記述は残る
+    source.write_text(managed_source("managed body v2\n"), encoding="utf-8", newline="\n")
+    updated = run_bootstrap(worktree, "--apply", "--confirm")
+    assert updated.returncode == 0, updated.stderr
+    content = deployed.read_text(encoding="utf-8")
+    assert content.startswith(user_text), "user text must stay"
+    assert "managed body v2" in content and "managed body v1" not in content
+    assert content.count("pkw:managed:start") == 1
+
+    # 利用者がブロック内を編集: 衝突にして、更新しない
+    edited = content.replace("managed body v2", "managed body EDITED")
+    deployed.write_text(edited, encoding="utf-8", newline="\n")
+    source.write_text(managed_source("managed body v3\n"), encoding="utf-8", newline="\n")
+    conflict = run_bootstrap(worktree, "--apply", "--confirm")
+    assert conflict.returncode == 10, conflict.stderr
+    assert deployed.read_text(encoding="utf-8") == edited, "edits inside the block must be kept"
+
+    # 終了マーカーがない: 追記せず衝突にする
+    broken = 'my text\n<!-- pkw:managed:start id="fixture-managed" revision="1" -->\nno end marker\n'
+    deployed.write_text(broken, encoding="utf-8", newline="\n")
+    incomplete = run_bootstrap(worktree)
+    assert incomplete.returncode == 10, incomplete.stderr
+    assert deployed.read_text(encoding="utf-8") == broken
+
+    # ファイルがない: 新規作成し、hashつきのマーカーを書く
+    deployed.unlink()
+    created = run_bootstrap(worktree, "--apply", "--confirm")
+    assert created.returncode == 0, created.stderr
+    content = deployed.read_text(encoding="utf-8")
+    assert content.startswith("# Fixture entry")
+    assert "managed body v3" in content
+    assert 'sha256="' in content
+
+
 def assert_home_target_case(root: Path) -> None:
     worktree = prepare_worktree(root, "home-worktree")
     home = root / "fixture-home"
@@ -187,6 +269,7 @@ def main() -> int:
         assert_success_case(root)
         assert_conflict_case(root)
         assert_update_case(root)
+        assert_managed_block_case(root)
         assert_home_target_case(root)
     print("bootstrap fixture validation passed")
     return 0
