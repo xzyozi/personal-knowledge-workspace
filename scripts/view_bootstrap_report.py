@@ -17,7 +17,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="ローカルのworkspaceレポートを表示する")
     parser.add_argument(
         "--report",
-        choices=("bootstrap", "reverse", "migrate"),
+        choices=("bootstrap", "reverse", "migrate", "init"),
         default="bootstrap",
         help="表示するレポートの種類",
     )
@@ -29,6 +29,7 @@ def main(argv: list[str] | None = None) -> int:
             "bootstrap": settings["report_json"],
             "reverse": settings["reverse_report_json"],
             "migrate": settings["migrate_report_json"],
+            "init": settings["init_report_json"],
         }
         report_path = report_paths[args.report]
         report_dir = html_path.parent

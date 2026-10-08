@@ -67,7 +67,9 @@ REQUIRED_FILES = (
     "scripts/view_bootstrap_report.py",
     "scripts/test_bootstrap.py",
     "scripts/test_reverse_bootstrap.py",
+    "scripts/init_knowledge.py",
     "scripts/test_migrate_knowledge.py",
+    "scripts/test_init_knowledge.py",
     "scripts/test_validate_structure.py",
 )
 AI_DIRECTORIES = (".kiro", ".gemini", ".claude", ".codex")

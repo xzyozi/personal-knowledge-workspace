@@ -36,10 +36,33 @@ html = "bootstrap-report.html"
 json = "bootstrap-report.json"
 reverse_json = "reverse-bootstrap-report.json"
 migrate_json = "migrate-knowledge-report.json"
+init_json = "init-knowledge-report.json"
 state = "bootstrap-state.json"
 
 [report.server]
 port = 8765
+
+[init]
+# init_knowledge.pyが個人側のknowledge/へ作成する骨格の許可リスト。リポジトリ相対パス。
+# 04-sources/の日付付き記録など、テンプレート作者の原本は含めない。
+files = [
+  "knowledge/01-private/.gitignore",
+  "knowledge/01-private/README.md",
+  "knowledge/02-facts/README.md",
+  "knowledge/03-output/README.md",
+  "knowledge/03-output/03.01-periodic-reports/README.md",
+  "knowledge/04-sources/04.00-inbox/.gitkeep",
+  "knowledge/04-sources/04.01-periodic-captures/README.md",
+  "knowledge/04-sources/04.02-external-materials/README.md",
+  "knowledge/05-tasks/README.md",
+  "knowledge/05-tasks/05.01-inbox/README.md",
+  "knowledge/05-tasks/05.02-active/README.md",
+  "knowledge/05-tasks/05.03-waiting/README.md",
+  "knowledge/06-large/.gitignore",
+  "knowledge/06-large/README.md",
+  "knowledge/99-archive/README.md",
+  "knowledge/projects/INDEX.md",
+]
 
 [migration]
 # 移行元として指定できない固定の拒否リスト。走査中に見つかった同名ディレクトリも取り込まない。

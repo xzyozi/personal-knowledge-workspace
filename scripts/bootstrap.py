@@ -267,6 +267,7 @@ def load_settings(*, create_local_config: bool = True) -> dict[str, Any]:
             "report_json": safe_report_path(standard, "json"),
             "reverse_report_json": safe_report_path(standard, "reverse_json"),
             "migrate_report_json": safe_report_path(standard, "migrate_json"),
+            "init_report_json": safe_report_path(standard, "init_json"),
             "migration": {"sources": list(migration_sources), "deny": list(migration_deny)},
             "report_html": safe_report_path(standard, "html"),
             "state_path": safe_report_path(standard, "state"),

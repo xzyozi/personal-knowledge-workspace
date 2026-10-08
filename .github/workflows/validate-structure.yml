@@ -43,3 +43,6 @@ jobs:
 
       - name: Validate migrate-knowledge fixtures
         run: python scripts/test_migrate_knowledge.py
+
+      - name: Validate init-knowledge fixtures
+        run: python scripts/test_init_knowledge.py
