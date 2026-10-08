@@ -245,7 +245,7 @@ def load_settings(*, create_local_config: bool = True) -> dict[str, Any]:
                 raise BootstrapError("configuration_error", f"target idが重複しています: {target_id}")
             ids.add(target_id)
             mode = str(raw.get("mode", "create-only"))
-            if mode not in {"create-only", "managed-block"}:
+            if mode not in {"create-only", "managed-block", "update-if-unmodified"}:
                 raise BootstrapError("configuration_error", f"未対応のtarget modeです: {mode}")
             targets.append(TargetSpec(target_id, str(raw["source"]), str(raw["destination"]), mode, int(raw.get("revision", 1))))
         port = int(effective.get("report", {}).get("server", {}).get("port", 8765))
@@ -331,9 +331,27 @@ def managed_update(source: bytes, existing: bytes, target_id: str) -> tuple[byte
     return updated.encode("utf-8"), "managed_block_updated"
 
 
+def load_applied_hashes(settings: dict[str, Any]) -> dict[str, str]:
+    """前回の適用で記録した、配布先ごとのテンプレートのhashを返す。読めなければ空にする。"""
+    try:
+        state = json.loads(settings["state_path"].read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return {}
+    if not isinstance(state, dict) or state.get("schema_version") != STATE_SCHEMA_VERSION:
+        return {}
+    if state.get("profile") != settings["profile"] or not isinstance(state.get("applied_files"), list):
+        return {}
+    hashes: dict[str, str] = {}
+    for entry in state["applied_files"]:
+        if isinstance(entry, dict) and isinstance(entry.get("destination"), str) and isinstance(entry.get("sha256"), str):
+            hashes[entry["destination"]] = entry["sha256"]
+    return hashes
+
+
 def make_plan(settings: dict[str, Any]) -> list[PlannedItem]:
     plan: list[PlannedItem] = []
     messages = settings["messages"]
+    applied_hashes = load_applied_hashes(settings)
     for spec, source, destination_rel, report_id in expand_targets(settings):
         source_bytes = source.read_bytes()
         source_hash = sha256_bytes(source_bytes)
@@ -358,6 +376,14 @@ def make_plan(settings: dict[str, Any]) -> list[PlannedItem]:
                 plan.append(PlannedItem("skip", report_id, source_name, relative_destination, spec.mode, spec.revision, source_hash, reason, messages.get(reason, "管理ブロックは同一です"), None, existing))
             else:
                 plan.append(PlannedItem("conflict", report_id, source_name, relative_destination, spec.mode, spec.revision, source_hash, reason, messages.get(reason, "管理ブロックを安全に更新できません")))
+        elif spec.mode == "update-if-unmodified":
+            recorded = applied_hashes.get(relative_destination)
+            if recorded is not None and sha256_bytes(existing) == recorded:
+                plan.append(PlannedItem("update", report_id, source_name, relative_destination, spec.mode, spec.revision, source_hash, "template_updated", messages.get("template_updated", "テンプレートの更新を反映します"), source_bytes, existing))
+            else:
+                reason = "user_modified" if recorded is not None else "no_apply_record"
+                default_message = "利用者が変更したため更新しません" if recorded is not None else "適用記録がないため更新しません"
+                plan.append(PlannedItem("conflict", report_id, source_name, relative_destination, spec.mode, spec.revision, source_hash, reason, messages.get(reason, default_message), None, existing))
         else:
             plan.append(PlannedItem("conflict", report_id, source_name, relative_destination, spec.mode, spec.revision, source_hash, "unmanaged_existing_file", messages.get("unmanaged_existing_file", "未管理の既存ファイルと衝突しました"), None, existing))
     return plan

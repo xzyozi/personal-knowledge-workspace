@@ -24,6 +24,9 @@ managed_block_modified = "管理ブロックがユーザーによって変更さ
 managed_block_not_utf8 = "管理ブロックをUTF-8として読めません"
 same_managed_block = "管理ブロックは同一です"
 managed_block_updated = "管理ブロックを更新します"
+template_updated = "テンプレートの更新を反映します"
+user_modified = "利用者が変更したため更新しません"
+no_apply_record = "適用記録がないため更新しません"
 
 [report]
 directory = "reports"
@@ -66,84 +69,84 @@ description = "共有入口、ナレッジ索引、共通ルール"
 id = "common-agents"
 source = "AGENTS.md"
 destination = "AGENTS.md"
-mode = "create-only"
+mode = "update-if-unmodified"
 revision = 1
 
 [[profiles.default.targets]]
 id = "gemini-entry"
 source = "GEMINI.md"
 destination = "GEMINI.md"
-mode = "create-only"
+mode = "update-if-unmodified"
 revision = 1
 
 [[profiles.default.targets]]
 id = "kiro-readme"
 source = ".kiro/README.md"
 destination = ".kiro/README.md"
-mode = "create-only"
+mode = "update-if-unmodified"
 revision = 1
 
 [[profiles.default.targets]]
 id = "kiro-knowledge-entry"
 source = ".kiro/steering/knowledge-entry.md"
 destination = ".kiro/steering/knowledge-entry.md"
-mode = "create-only"
+mode = "update-if-unmodified"
 revision = 1
 
 [[profiles.default.targets]]
 id = "gemeni-readme"
 source = ".gemeni/README.md"
 destination = ".gemeni/README.md"
-mode = "create-only"
+mode = "update-if-unmodified"
 revision = 1
 
 [[profiles.default.targets]]
 id = "gemeni-knowledge-entry"
 source = ".gemeni/knowledge-entry.md"
 destination = ".gemeni/knowledge-entry.md"
-mode = "create-only"
+mode = "update-if-unmodified"
 revision = 1
 
 [[profiles.default.targets]]
 id = "claude-readme"
 source = ".claude/README.md"
 destination = ".claude/README.md"
-mode = "create-only"
+mode = "update-if-unmodified"
 revision = 1
 
 [[profiles.default.targets]]
 id = "claude-knowledge-entry"
 source = ".claude/knowledge-entry.md"
 destination = ".claude/knowledge-entry.md"
-mode = "create-only"
+mode = "update-if-unmodified"
 revision = 1
 
 [[profiles.default.targets]]
 id = "codex-readme"
 source = ".codex/README.md"
 destination = ".codex/README.md"
-mode = "create-only"
+mode = "update-if-unmodified"
 revision = 1
 
 [[profiles.default.targets]]
 id = "codex-knowledge-entry"
 source = ".codex/knowledge-entry.md"
 destination = ".codex/knowledge-entry.md"
-mode = "create-only"
+mode = "update-if-unmodified"
 revision = 1
 
 [[profiles.default.targets]]
 id = "knowledge-index"
 source = "knowledge/INDEX.md"
 destination = "knowledge/INDEX.md"
-mode = "create-only"
+mode = "update-if-unmodified"
 revision = 1
 
 [[profiles.default.targets]]
 id = "knowledge-rules"
 source = "knowledge/00-rules"
 destination = "knowledge/00-rules"
-mode = "create-only"
+mode = "update-if-unmodified"
 revision = 1
 
 [profiles.personal]
