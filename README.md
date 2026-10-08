@@ -172,6 +172,16 @@ python scripts/validate_structure.py
 
 同じ検証はGitHub Actionsでも実行します。
 
+構造の検証に加えて、リポジトリのMarkdownについて、次の書式を検査します。
+
+- 改行コードがLFで、UTF-8として読める
+- タブ文字がない
+- コードブロックのフェンスが対になっている
+- 本文にユーザーのホームを指す絶対パス（Windowsのユーザーフォルダ、Unixの`home`・`Users`配下）がない。ホームは`~`で書く
+- 本文内の相対リンクが解決できる（コードブロックとインラインコードの中は対象外）
+
+対象外は、`knowledge/04-sources/`（原本）、`knowledge/01-private/`、`knowledge/06-large/` です。
+
 ## ライセンス
 
 Apache License 2.0。著作権表示の権利者・年は、配布方針を確定した時点で設定します。
