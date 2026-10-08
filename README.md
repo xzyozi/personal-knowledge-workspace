@@ -147,6 +147,27 @@ python scripts/view_bootstrap_report.py --report migrate
 
 詳細な設計と安全条件は`docs/design/migrate-knowledge.md`を参照してください。
 
+## 個人側の骨格の初期設定
+
+個人側の`knowledge/`に、README、`projects/INDEX.md`などの骨格を、なければ作成します。
+
+```powershell
+# dry-run（既定）
+python scripts/init_knowledge.py
+
+# 作成
+python scripts/init_knowledge.py --apply --confirm
+
+# レポートを表示
+python scripts/view_bootstrap_report.py --report init
+```
+
+- 作成先は、`config/bootstrap.local.toml`の`target.root`の`knowledge/`です。
+- 作成するのは、`config/bootstrap.toml`の`[init]`の許可リストにあるファイルだけです。
+- 既存のファイルは、内容にかかわらずスキップします。上書きも削除もしません。
+- テンプレート作者の原本（`04-sources/`の日付付きの記録）は配りません。
+- 詳細は`docs/design/init-knowledge.md`を参照してください。
+
 ## 共有エージェント
 
 入口ファイルから、このプロジェクトが管理する共有エージェント（`knowledge/00-rules/agents/pkw-knowledge-steward.md`）を読めます。エージェントは、内部のSkillの一覧（名前と説明）を持ち、現在の作業に該当するSkillだけ本文を読みます。
