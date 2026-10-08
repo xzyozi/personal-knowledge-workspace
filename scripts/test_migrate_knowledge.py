@@ -15,13 +15,15 @@ INBOX = Path("knowledge/04-sources/04.00-inbox")
 SECRET_VALUE = "hunter2hunter2"
 
 
-def write_local_config(worktree: Path, target: Path, sources: list[str]) -> None:
+def write_local_config(worktree: Path, target: Path, sources: list[str], allow_home: bool = False) -> None:
     config = worktree / "config" / "bootstrap.local.toml"
+    allow = "allow_home = true\n" if allow_home else ""
     config.write_text(
         "[profile]\n"
         'name = "default"\n\n'
         "[target]\n"
-        f"root = {json.dumps(target.as_posix())}\n\n"
+        f"root = {json.dumps(target.as_posix())}\n"
+        f"{allow}\n"
         "[migration]\n"
         f"sources = {json.dumps(sources)}\n\n"
         "[report.server]\n"
@@ -215,10 +217,25 @@ def assert_verify_detects_changes(root: Path) -> None:
     assert [(item["action"], item["reason"]) for item in items] == [("error", "hash_mismatch")]
 
 
+def assert_home_target_migration(root: Path) -> None:
+    worktree, home, _target = prepare_fixture(root, "homeroot", ["Documents/notes"])
+    write_local_config(worktree, home, ["Documents/notes"], allow_home=True)
+    write_file(home / "Documents" / "notes" / "a.md", b"# a\n")
+
+    applied = run_migrate(worktree, home, "--apply", "--confirm")
+    assert applied.returncode == 0, applied.stderr
+    assert (home / INBOX / "Documents" / "notes" / "a.md").read_bytes() == b"# a\n"
+
+    write_local_config(worktree, home, ["knowledge"], allow_home=True)
+    overlap = run_migrate(worktree, home)
+    assert overlap.returncode == 30, overlap.stderr
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="pkw-migrate-knowledge-") as directory:
         root = Path(directory)
         assert_dry_run_apply_and_verify(root)
+        assert_home_target_migration(root)
         assert_moved_files_are_not_recopied(root)
         assert_conflicts_and_secrets_are_excluded(root)
         assert_unsafe_sources_are_rejected(root)

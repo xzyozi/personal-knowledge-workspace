@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -10,6 +11,37 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def write_home_config(worktree: Path, target: Path, allow_home: bool) -> None:
+    config = worktree / "config" / "bootstrap.local.toml"
+    allow = "allow_home = true\n" if allow_home else ""
+    config.write_text(
+        "[profile]\n"
+        "name = \"default\"\n\n"
+        "[target]\n"
+        f"root = \"{target.as_posix()}\"\n"
+        f"{allow}\n"
+        "[report.server]\n"
+        "port = 8765\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
+def run_bootstrap_with_home(worktree: Path, home: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    env = os.environ.copy()
+    env["HOME"] = str(home)
+    env["USERPROFILE"] = str(home)
+    return subprocess.run(
+        [sys.executable, "-X", "utf8", str(worktree / "scripts" / "bootstrap.py"), *args],
+        cwd=worktree,
+        env=env,
+        text=True,
+        encoding="utf-8",
+        capture_output=True,
+        check=False,
+    )
 
 
 def write_local_config(worktree: Path, target: Path) -> None:
@@ -81,11 +113,45 @@ def assert_conflict_case(root: Path) -> None:
     assert any(item["destination"] == "AGENTS.md" for item in report["items"])
 
 
+def assert_home_target_case(root: Path) -> None:
+    worktree = prepare_worktree(root, "home-worktree")
+    home = root / "fixture-home"
+    home.mkdir()
+
+    write_home_config(worktree, home, allow_home=False)
+    refused = run_bootstrap_with_home(worktree, home)
+    assert refused.returncode == 1, refused.stderr
+    assert "allow_home" in refused.stderr
+    assert not (home / "AGENTS.md").exists()
+
+    write_home_config(worktree, root, allow_home=True)
+    above_home = run_bootstrap_with_home(worktree, home)
+    assert above_home.returncode == 1, above_home.stderr
+    assert not (root / "AGENTS.md").exists()
+
+    user_file = home / "AGENTS.md"
+    user_file.write_text("user-owned content\n", encoding="utf-8", newline="\n")
+    write_home_config(worktree, home, allow_home=True)
+    conflict = run_bootstrap_with_home(worktree, home, "--apply", "--confirm")
+    assert conflict.returncode == 10, conflict.stderr
+    assert user_file.read_text(encoding="utf-8") == "user-owned content\n"
+    assert not (home / "GEMINI.md").exists(), "conflict must stop the whole apply"
+
+    user_file.unlink()
+    applied = run_bootstrap_with_home(worktree, home, "--apply", "--confirm")
+    assert applied.returncode == 0, applied.stderr
+    assert (home / "AGENTS.md").is_file()
+    assert (home / ".kiro" / "steering" / "knowledge-entry.md").is_file()
+    assert (home / "knowledge" / "INDEX.md").is_file()
+    assert (worktree / "reports" / "bootstrap-state.json").is_file()
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="pkw-bootstrap-") as directory:
         root = Path(directory)
         assert_success_case(root)
         assert_conflict_case(root)
+        assert_home_target_case(root)
     print("bootstrap fixture validation passed")
     return 0
 

@@ -3,6 +3,11 @@ name = "default"
 
 [target]
 root = "~/.personal-knowledge-runtime"
+# AIツールにグローバル設定として読ませる場合は、ホーム直下へ展開する。
+# ホームをtargetにするには、allow_home = trueの明示が必要。
+# 展開はconfig/bootstrap.tomlの許可リストの新規作成だけで、既存ファイルは上書きしない。
+# root = "~/"
+# allow_home = true
 
 [storage.knowledge]
 provider = "local"

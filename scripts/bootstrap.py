@@ -118,8 +118,10 @@ def merge_local_config(standard: dict[str, Any], local: dict[str, Any]) -> dict[
 
     target = local.get("target", {})
     if target:
-        if set(target) - {"root"}:
-            raise BootstrapError("configuration_error", "local設定のtargetはrootだけ指定できます")
+        if set(target) - {"root", "allow_home"}:
+            raise BootstrapError("configuration_error", "local設定のtargetはrootとallow_homeだけ指定できます")
+        if "allow_home" in target and not isinstance(target["allow_home"], bool):
+            raise BootstrapError("configuration_error", "target.allow_homeはtrueまたはfalseで指定してください")
         result["target"] = copy.deepcopy(target)
 
     if "storage" in local:
@@ -221,8 +223,15 @@ def load_settings(*, create_local_config: bool = True) -> dict[str, Any]:
             target_root = ROOT / target_root
         target_root = target_root.resolve()
         home = Path.home().resolve()
-        if target_root in {ROOT.resolve(), home}:
-            raise BootstrapError("safety_error", "リポジトリrootやユーザーホーム全体はtargetにできません")
+        if target_root == ROOT.resolve():
+            raise BootstrapError("safety_error", "リポジトリrootはtargetにできません")
+        if target_root in home.parents:
+            raise BootstrapError("safety_error", "ホームより上位のディレクトリはtargetにできません")
+        if target_root == home and effective.get("target", {}).get("allow_home") is not True:
+            raise BootstrapError(
+                "safety_error",
+                "ホームをtargetにするには、local設定の[target]にallow_home = trueを指定してください",
+            )
         targets: list[TargetSpec] = []
         ids: set[str] = set()
         for raw in raw_targets:
