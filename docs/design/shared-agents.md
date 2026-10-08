@@ -77,7 +77,7 @@ description: 個人ナレッジの読み書きと分類を担当する共有エ�
 - 現在の作業が `description` に該当する場合だけ、リンク先の本文を読みます。該当しないSkillは開きません。
 - 表の `name` と `description` は、Skill本文のfrontmatterと一致させます。
 - 一覧は手で更新します。更新漏れは `validate_structure.py` が検出します。
-- 初版（#13）では、Skillはまだありません。表は空です。
+- 最初のSkillは `pkw-verify-knowledge-load` です（#14）。移行後のナレッジが正しく読み込めているかを確認します。
 
 ## 入口からの参照
 
@@ -130,5 +130,5 @@ Skill本文は、どの入口でも取り込みません。
 
 ## 範囲外
 
-- 最初のSkill（`pkw-verify-knowledge-load`）は #14 で追加します。
+- 実機での確認結果（#12、#14）は、確認後に追記します。
 - ネイティブな置き場（例: `.kiro/skills/`）への配布は、必要になった時点で追加します。正本は `knowledge/00-rules/` のままです。
