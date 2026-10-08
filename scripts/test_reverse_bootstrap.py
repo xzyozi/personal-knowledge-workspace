@@ -169,6 +169,49 @@ def assert_safety_guards(root: Path) -> None:
     assert (secret_worktree / "AGENTS.md").read_text(encoding="utf-8") != 'api_key = "supersecretvalue"\n'
 
 
+def assert_managed_block_is_excluded(root: Path) -> None:
+    worktree = prepare_worktree(root, "managed-worktree")
+    managed = (
+        "# Fixture entry\n\n"
+        '<!-- pkw:managed:start id="fixture-managed" revision="1" -->\n'
+        "managed body\n"
+        '<!-- pkw:managed:end id="fixture-managed" -->\n'
+    )
+    source = worktree / "fixture-managed.md"
+    source.write_text(managed, encoding="utf-8", newline="\n")
+    config = worktree / "config" / "bootstrap.toml"
+    text = config.read_text(encoding="utf-8")
+    target_entry = (
+        "[[profiles.default.targets]]\n"
+        'id = "fixture-managed"\n'
+        'source = "fixture-managed.md"\n'
+        'destination = "fixture-managed.md"\n'
+        'mode = "managed-block"\n'
+        "revision = 1\n\n"
+    )
+    assert "[profiles.personal]" in text
+    config.write_text(text.replace("[profiles.personal]", target_entry + "[profiles.personal]", 1), encoding="utf-8", newline="\n")
+    target = root / "managed-target"
+    write_local_config(worktree, target)
+    initialize_git(worktree)
+    deployed_result = run_script(worktree, "bootstrap.py", "--apply", "--confirm")
+    assert deployed_result.returncode == 0, deployed_result.stderr
+
+    deployed = target / "fixture-managed.md"
+    deployed.write_text(deployed.read_text(encoding="utf-8") + "\nmy personal text\n", encoding="utf-8", newline="\n")
+    dry_run = run_script(worktree, "reverse_bootstrap.py")
+    assert dry_run.returncode == 0, dry_run.stderr
+    items = read_reverse_report(worktree)["items"]
+    assert any(item["id"] == "fixture-managed" and item["reason"] == "managed_block_excluded" for item in items)
+
+    applied = run_script(worktree, "reverse_bootstrap.py", "--apply", "--confirm")
+    assert applied.returncode == 0, applied.stderr
+    assert source.read_text(encoding="utf-8") == managed, "personal text must never reach the template"
+    status = run_git(worktree, "status", "--porcelain")
+    assert status.returncode == 0, status.stderr
+    assert status.stdout.strip() == "", status.stdout
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="pkw-reverse-bootstrap-") as directory:
         root = Path(directory)
@@ -176,6 +219,7 @@ def main() -> int:
         assert_new_file_is_reversed(root)
         assert_delete_candidate_is_git_visible(root)
         assert_safety_guards(root)
+        assert_managed_block_is_excluded(root)
     print("reverse-bootstrap fixture validation passed")
     return 0
 

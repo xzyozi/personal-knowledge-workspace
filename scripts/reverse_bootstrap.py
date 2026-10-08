@@ -248,6 +248,8 @@ def make_mappings(settings: dict[str, Any]) -> dict[tuple[str, str], Mapping]:
     mappings: dict[tuple[str, str], Mapping] = {}
     target_root = settings["target_root"]
     for spec in settings["targets"]:
+        if spec.mode == "managed-block":
+            continue
         source_rel = validate_relative_path(spec.source, f"{spec.id}.source")
         destination_rel = validate_relative_path(spec.destination, f"{spec.id}.destination")
         source_root = resolve_repository_path(source_rel, f"{spec.id}.source")
@@ -294,6 +296,21 @@ def make_plan(
     mappings = make_mappings(settings)
     plan: list[ReverseItem] = []
     messages = settings["messages"]
+    for spec in settings["targets"]:
+        if spec.mode == "managed-block":
+            plan.append(
+                ReverseItem(
+                    "warning",
+                    spec.id,
+                    spec.source,
+                    spec.destination,
+                    spec.mode,
+                    spec.revision,
+                    "",
+                    "managed_block_excluded",
+                    "管理ブロック方式のため取り込みません（利用者の記述を取り込まないため）",
+                )
+            )
     for key in sorted(mappings):
         mapping = mappings[key]
         source_path = mapping.source

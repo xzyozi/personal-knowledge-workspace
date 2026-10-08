@@ -309,6 +309,26 @@ def find_managed_block(text: str, target_id: str) -> tuple[re.Match[str], re.Mat
     return None
 
 
+def render_managed_source(source: bytes, target_id: str) -> bytes | None:
+    """配布用に、開始マーカーへブロック本文のhashを書き込んだ内容を返す。
+
+    配布先では、このhashと現在の本文を比べて、利用者の編集を検出する。
+    テンプレート側にhashを手で書く必要はない。
+    """
+    try:
+        text = source.decode("utf-8")
+    except UnicodeDecodeError:
+        return None
+    block = find_managed_block(text, target_id)
+    if block is None:
+        return None
+    start, _end, body = block
+    revision = start.group(2) or "1"
+    body_hash = sha256_bytes(body.encode("utf-8"))
+    marker = f'<!-- pkw:managed:start id="{target_id}" revision="{revision}" sha256="{body_hash}" -->'
+    return (text[:start.start()] + marker + text[start.end():]).encode("utf-8")
+
+
 def managed_update(source: bytes, existing: bytes, target_id: str) -> tuple[bytes | None, str]:
     try:
         source_text = source.decode("utf-8")
@@ -319,15 +339,23 @@ def managed_update(source: bytes, existing: bytes, target_id: str) -> tuple[byte
     existing_block = find_managed_block(existing_text, target_id)
     if source_block is None:
         return None, "source_managed_block_missing"
+    source_block_text = source_text[source_block[0].start():source_block[1].end()]
     if existing_block is None:
-        return None, "managed_block_missing"
+        if any(match.group(1) == target_id for match in START_MARKER.finditer(existing_text)):
+            return None, "managed_block_incomplete"
+        if not existing_text:
+            appended = source_block_text + "\n"
+        else:
+            separator = "\n" if existing_text.endswith("\n") else "\n\n"
+            appended = existing_text + separator + source_block_text + "\n"
+        return appended.encode("utf-8"), "managed_block_appended"
     recorded_hash = existing_block[0].group(3)
     if recorded_hash and recorded_hash != sha256_bytes(existing_block[2].encode("utf-8")):
         return None, "managed_block_modified"
     source_body_hash = sha256_bytes(source_block[2].encode("utf-8"))
     if sha256_bytes(existing_block[2].encode("utf-8")) == source_body_hash:
         return existing, "same_managed_block"
-    updated = existing_text[:existing_block[0].start()] + source_text[source_block[0].start():source_block[1].end()] + existing_text[existing_block[1].end():]
+    updated = existing_text[:existing_block[0].start()] + source_block_text + existing_text[existing_block[1].end():]
     return updated.encode("utf-8"), "managed_block_updated"
 
 
@@ -354,6 +382,12 @@ def make_plan(settings: dict[str, Any]) -> list[PlannedItem]:
     applied_hashes = load_applied_hashes(settings)
     for spec, source, destination_rel, report_id in expand_targets(settings):
         source_bytes = source.read_bytes()
+        if spec.mode == "managed-block":
+            rendered = render_managed_source(source_bytes, spec.id)
+            if rendered is None:
+                plan.append(PlannedItem("conflict", report_id, source.relative_to(ROOT).as_posix(), destination_rel.as_posix(), spec.mode, spec.revision, sha256_bytes(source_bytes), "source_managed_block_missing", messages.get("source_managed_block_missing", "テンプレート側に管理ブロックがありません")))
+                continue
+            source_bytes = rendered
         source_hash = sha256_bytes(source_bytes)
         destination = settings["target_root"] / destination_rel
         relative_destination = destination_rel.as_posix()

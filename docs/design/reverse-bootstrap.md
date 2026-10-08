@@ -43,6 +43,7 @@ reverse-bootstrapは、`config/bootstrap.toml`の`default` profileを対象に�
 - バイナリ実体
 - ユーザーホーム全体の自動走査
 - 外部ストレージとの同期
+- `managed-block` モードの対象（利用者の記述が混ざるファイル。個人的な記述がテンプレートに入るのを防ぐ）
 
 factの昇格条件・承認方法・個人ナレッジの保管方法は、reverse-bootstrapとは別の課題で扱います。
 
