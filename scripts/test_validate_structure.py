@@ -245,6 +245,24 @@ def main() -> int:
             write(excluded / excluded_directory / "raw.md", "\tC:\\Users\\someone\n[missing](./missing.md)\n" + FENCE + "\n")
         assert run_hygiene(excluded) == [], run_hygiene(excluded)
 
+        tracked = base / "tracked-abs"
+        write(tracked / "config" / "a.toml", 'root = "C:\\Users\\someone\\x"\n')
+        write(tracked / "scripts" / "b.py", 'PATH = "/home/someone/x"\n')
+        write(tracked / "scripts" / "test_c.py", 'PATH = "/home/someone/x"\n')
+        write(tracked / "knowledge" / "04-sources" / "d.md", "C:\\Users\\someone\n")
+        write(tracked / "knowledge" / "02-facts" / "ok.md", "相対パスだけ\n")
+        write_bytes(tracked / "bin.dat", b"\x00C:\\Users\\someone\\\n")
+        found: list[str] = []
+        checker.check_tracked_absolute_paths(
+            found,
+            tracked,
+            ["config/a.toml", "scripts/b.py", "scripts/test_c.py", "knowledge/04-sources/d.md", "knowledge/02-facts/ok.md", "bin.dat", "missing.txt"],
+        )
+        assert sorted(found) == [
+            "tracked file contains an absolute path: config/a.toml",
+            "tracked file contains an absolute path: scripts/b.py",
+        ], found
+
         header = "## Projects\n\n| name | 状態 | 概要 | 次のアクション | リポジトリ | 最終確認日 |\n|---|---|---|---|---|---|\n"
         good_row = "| my-app | active | 概要 | 次 | owner/repo | 2026-10-07 |\n"
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import re
+import subprocess
 import sys
 import tomllib
 from pathlib import Path
@@ -476,6 +477,43 @@ def check_projects_index(errors: list[str], root: Path = ROOT) -> None:
             errors.append(f"projects index date must be YYYY-MM-DD: {name}")
 
 
+ABSOLUTE_PATH_EXCLUDED_PREFIXES = MARKDOWN_EXCLUDED_PREFIXES
+ABSOLUTE_PATH_EXCLUDED_TESTS = ("scripts/test_",)
+
+
+def list_tracked_files(root: Path) -> list[str] | None:
+    """git ls-filesで追跡ファイルを返す。gitを使えない場合はNoneを返す。"""
+    try:
+        completed = subprocess.run(
+            ["git", "ls-files", "-z"], cwd=root, capture_output=True, check=True
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return [name for name in completed.stdout.decode("utf-8", "replace").split("\0") if name]
+
+
+def check_tracked_absolute_paths(errors: list[str], root: Path = ROOT, files: list[str] | None = None) -> None:
+    """追跡されているテキストファイルに、ユーザー固有の絶対パスが無いことを検査する。"""
+    names = files if files is not None else list_tracked_files(root)
+    if names is None:
+        return
+    for name in names:
+        if name.startswith(ABSOLUTE_PATH_EXCLUDED_PREFIXES):
+            continue
+        if name.startswith(ABSOLUTE_PATH_EXCLUDED_TESTS) and name.endswith(".py"):
+            continue
+        path = root / name
+        try:
+            data = path.read_bytes()
+            text = data.decode("utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        if b"\0" in data:
+            continue
+        if ABSOLUTE_WINDOWS_PATH.search(text) or ABSOLUTE_UNIX_PATH.search(text):
+            errors.append(f"tracked file contains an absolute path: {name}")
+
+
 def main() -> int:
     errors: list[str] = []
     check_required_paths(errors)
@@ -486,6 +524,7 @@ def main() -> int:
     check_legacy_names(errors)
     check_markdown_hygiene(errors)
     check_projects_index(errors)
+    check_tracked_absolute_paths(errors)
     if errors:
         print("Structure validation failed:", file=sys.stderr)
         for error in errors:
