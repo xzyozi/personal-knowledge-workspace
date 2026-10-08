@@ -64,6 +64,7 @@ REQUIRED_FILES = (
     "scripts/test_bootstrap.py",
     "scripts/test_reverse_bootstrap.py",
     "scripts/test_migrate_knowledge.py",
+    "scripts/test_validate_structure.py",
 )
 AI_DIRECTORIES = (".kiro", ".gemeni", ".claude", ".codex")
 EXCLUDED_DIRECTORY_NAMES = {".git", ".kiro", "__pycache__"}
@@ -118,11 +119,177 @@ def check_sensitive_names(errors: list[str]) -> None:
             errors.append(f"sensitive-looking filename outside local-only areas: {relative}")
 
 
+AGENT_DIRECTORY = "knowledge/00-rules/agents"
+SKILL_DIRECTORY = "knowledge/00-rules/skills"
+ENTRY_FILES = (
+    "AGENTS.md",
+    "GEMINI.md",
+    ".kiro/steering/knowledge-entry.md",
+    ".gemeni/knowledge-entry.md",
+    ".claude/knowledge-entry.md",
+    ".codex/knowledge-entry.md",
+)
+SHARED_NAME = re.compile(r"^pkw-[a-z0-9]+(?:-[a-z0-9]+)*$")
+FRONTMATTER_KEYS = frozenset({"name", "description"})
+MAX_DESCRIPTION_LENGTH = 200
+TABLE_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+TABLE_SEPARATOR_CELL = re.compile(r"^:?-+:?$")
+
+
+def unquote(value: str) -> str:
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+        return value[1:-1]
+    return value
+
+
+def parse_frontmatter(text: str) -> dict[str, str] | None:
+    """先頭のfrontmatterを読む。閉じていない、または無い場合はNoneを返す。"""
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return None
+    data: dict[str, str] = {}
+    for line in lines[1:]:
+        if line.strip() == "---":
+            return data
+        match = re.match(r"^([A-Za-z_][\w-]*):\s*(.*)$", line)
+        if match:
+            data[match.group(1)] = unquote(match.group(2).strip())
+        elif line.strip():
+            data[line.strip()] = ""
+    return None
+
+
+def load_definitions(root: Path, directory: str, kind: str, errors: list[str]) -> dict[str, dict]:
+    """共有エージェントまたはSkillの定義を読み、frontmatterを検査する。"""
+    base = root / directory
+    definitions: dict[str, dict] = {}
+    if not base.is_dir():
+        return definitions
+    for path in sorted(base.glob("*.md")):
+        if path.name == "README.md":
+            continue
+        relative = path.relative_to(root).as_posix()
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            errors.append(f"{kind} definition is unreadable: {relative}")
+            continue
+        meta = parse_frontmatter(text)
+        if meta is None:
+            errors.append(f"{kind} requires frontmatter: {relative}")
+            continue
+        unknown = sorted(set(meta) - FRONTMATTER_KEYS)
+        if unknown:
+            errors.append(f"{kind} has unsupported frontmatter keys {unknown}: {relative}")
+        name = meta.get("name", "")
+        description = meta.get("description", "")
+        if not name:
+            errors.append(f"{kind} requires name: {relative}")
+        else:
+            if not SHARED_NAME.match(name):
+                errors.append(f"{kind} name must be pkw- kebab-case: {relative}")
+            if name != path.stem:
+                errors.append(f"{kind} name must match file name: {relative}")
+        if not description:
+            errors.append(f"{kind} requires description: {relative}")
+        else:
+            if len(description) > MAX_DESCRIPTION_LENGTH:
+                errors.append(f"{kind} description is longer than {MAX_DESCRIPTION_LENGTH} characters: {relative}")
+            if "|" in description:
+                errors.append(f"{kind} description must not contain a pipe: {relative}")
+        definitions[path.stem] = {
+            "path": path,
+            "relative": relative,
+            "name": name,
+            "description": description,
+            "text": text,
+        }
+    return definitions
+
+
+def parse_skill_rows(text: str) -> list[list[str]]:
+    """エージェント定義の「Skill一覧」の表から、データ行のセルを返す。"""
+    rows: list[list[str]] = []
+    in_section = False
+    for line in text.splitlines():
+        if line.startswith("## "):
+            in_section = line.strip() == "## Skill一覧"
+            continue
+        stripped = line.strip()
+        if not in_section or not stripped.startswith("|"):
+            continue
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        if all(TABLE_SEPARATOR_CELL.match(cell) for cell in cells):
+            continue
+        if cells == ["name", "description", "本文"]:
+            continue
+        rows.append(cells)
+    return rows
+
+
+def check_shared_definitions(errors: list[str], root: Path = ROOT) -> None:
+    agents = load_definitions(root, AGENT_DIRECTORY, "agent", errors)
+    skills = load_definitions(root, SKILL_DIRECTORY, "skill", errors)
+
+    seen: dict[str, str] = {}
+    for definitions in (agents, skills):
+        for definition in definitions.values():
+            name = definition["name"]
+            if not name:
+                continue
+            if name in seen:
+                errors.append(f"shared name is duplicated: {name} in {definition['relative']} and {seen[name]}")
+            else:
+                seen[name] = definition["relative"]
+
+    listed: set[str] = set()
+    for agent in agents.values():
+        for cells in parse_skill_rows(agent["text"]):
+            if len(cells) != 3:
+                errors.append(f"skill row must have three columns in {agent['relative']}")
+                continue
+            name = cells[0].strip("`")
+            description = cells[1]
+            link = TABLE_LINK.search(cells[2])
+            if link is None:
+                errors.append(f"skill row requires a link: {name} in {agent['relative']}")
+                continue
+            target = (agent["path"].parent / link.group(1)).resolve()
+            skill = next((value for value in skills.values() if value["path"].resolve() == target), None)
+            if skill is None:
+                errors.append(f"skill link is broken or outside skills/: {link.group(1)} in {agent['relative']}")
+                continue
+            listed.add(skill["path"].stem)
+            if skill["name"] != name:
+                errors.append(f"skill table name differs from frontmatter: {name} in {agent['relative']}")
+            if skill["description"] != description:
+                errors.append(f"skill table description differs from frontmatter: {name} in {agent['relative']}")
+    for stem, skill in skills.items():
+        if stem not in listed:
+            errors.append(f"skill is not listed in any agent: {skill['relative']}")
+
+    for agent in agents.values():
+        reference = f"{agent['path'].stem}.md"
+        for entry in ENTRY_FILES:
+            entry_path = root / entry
+            if not entry_path.is_file():
+                errors.append(f"missing entry file: {entry}")
+                continue
+            try:
+                entry_text = entry_path.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError):
+                errors.append(f"entry file is unreadable: {entry}")
+                continue
+            if reference not in entry_text:
+                errors.append(f"entry does not reference agent {reference}: {entry}")
+
+
 def main() -> int:
     errors: list[str] = []
     check_required_paths(errors)
     check_ai_directories(errors)
     check_sensitive_names(errors)
+    check_shared_definitions(errors)
     if errors:
         print("Structure validation failed:", file=sys.stderr)
         for error in errors:
