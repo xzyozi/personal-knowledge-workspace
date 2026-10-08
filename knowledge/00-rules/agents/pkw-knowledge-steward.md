@@ -24,3 +24,4 @@ description: 個人ナレッジの読み書きと分類を担当する共有エ�
 
 | name | description | 本文 |
 |---|---|---|
+| pkw-verify-knowledge-load | 移行後のナレッジが正しく読み込めているかを確認する。入口、索引、ルール、共有エージェントの読み込みと、取り込み結果の照合を確認したい時に使う | [pkw-verify-knowledge-load.md](../skills/pkw-verify-knowledge-load.md) |
