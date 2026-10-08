@@ -428,6 +428,52 @@ def check_markdown_hygiene(errors: list[str], root: Path = ROOT) -> None:
                 errors.append(f"markdown link is broken: {target} in {relative}")
 
 
+PROJECTS_INDEX = "knowledge/projects/INDEX.md"
+PROJECT_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+PROJECT_STATUSES = frozenset({"active", "paused", "waiting", "completed", "archived"})
+PROJECT_COLUMNS = ("name", "状態", "概要", "次のアクション", "リポジトリ", "最終確認日")
+REPOSITORY_ID = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+REMOTE_URL = re.compile(r"^(?:https?|ssh|git)://[^\s@/]+(?::\d+)?/\S+$|^[A-Za-z0-9_.-]+@[A-Za-z0-9_.-]+:\S+$")
+URL_CREDENTIALS = re.compile(r"://[^/\s@]*@")
+DATE_VALUE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def check_projects_index(errors: list[str], root: Path = ROOT) -> None:
+    """プロジェクト索引の「## Projects」表の各行を検査する。"""
+    text = read_text(root / PROJECTS_INDEX)
+    if text is None:
+        return
+    in_section = False
+    seen: set[str] = set()
+    for line in text.split("\n"):
+        if line.startswith("## "):
+            in_section = line.strip() == "## Projects"
+            continue
+        stripped = line.strip()
+        if not in_section or not stripped.startswith("|"):
+            continue
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        if all(TABLE_SEPARATOR_CELL.match(cell) for cell in cells) or tuple(cells) == PROJECT_COLUMNS:
+            continue
+        if len(cells) != len(PROJECT_COLUMNS):
+            errors.append(f"projects index row must have {len(PROJECT_COLUMNS)} columns: {stripped[:40]}")
+            continue
+        name, status, _summary, _next, repository, checked = cells
+        if not PROJECT_NAME.match(name):
+            errors.append(f"projects index name must be ASCII kebab-case: {name}")
+        elif name in seen:
+            errors.append(f"projects index name is duplicated: {name}")
+        seen.add(name)
+        if status not in PROJECT_STATUSES:
+            errors.append(f"projects index status is invalid: {name}")
+        if URL_CREDENTIALS.search(repository):
+            errors.append(f"projects index repository must not contain credentials: {name}")
+        elif repository != "-" and not (REPOSITORY_ID.match(repository) or REMOTE_URL.match(repository)):
+            errors.append(f"projects index repository must be owner/repo, a remote URL, or -: {name}")
+        if checked != "-" and not DATE_VALUE.match(checked):
+            errors.append(f"projects index date must be YYYY-MM-DD: {name}")
+
+
 def main() -> int:
     errors: list[str] = []
     check_required_paths(errors)
@@ -437,6 +483,7 @@ def main() -> int:
     check_global_entries(errors)
     check_legacy_names(errors)
     check_markdown_hygiene(errors)
+    check_projects_index(errors)
     if errors:
         print("Structure validation failed:", file=sys.stderr)
         for error in errors:
