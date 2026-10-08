@@ -28,6 +28,20 @@ python scripts/view_bootstrap_report.py
 
 成功したbootstrapの対象状態は、Git管理外の`reports/bootstrap-state.json`へ保存されます。
 
+### ホーム直下への展開
+
+AIツールにグローバル設定として読ませる場合は、`config/bootstrap.local.toml`でホームをtargetにします。ホームを指定するには、`allow_home = true`の明示が必要です。
+
+```toml
+[target]
+root = "~/"
+allow_home = true
+```
+
+- 展開は`config/bootstrap.toml`の許可リストの新規作成だけです。ホーム直下の既存ファイルは上書きせず、同名があれば衝突として全体を適用しません。
+- ホームより上位のディレクトリと、このリポジトリのrootはtargetにできません。
+- ホーム自体はGit作業ツリーにしません。個人ナレッジを管理する場合は、ホーム直下の`knowledge/`を独立したリポジトリ（`git init`）にします。
+
 ## Reverse Bootstrap
 
 reverse-bootstrapは、bootstrap後にユーザー環境で検証・修正したdefault profileのテンプレートを、リポジトリの作業ツリーへ戻します。個人factやprivate領域の同期には使いません。
