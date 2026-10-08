@@ -88,7 +88,7 @@ description: 個人ナレッジの読み書きと分類を担当する共有エ�
 | `AGENTS.md` | 手順とリンク |
 | `GEMINI.md` | `@./knowledge/00-rules/agents/pkw-knowledge-steward.md` |
 | `.kiro/steering/knowledge-entry.md` | `#[[file:../../knowledge/00-rules/agents/pkw-knowledge-steward.md]]` |
-| `.gemeni/`、`.claude/`、`.codex/` の `knowledge-entry.md` | リンク |
+| `.gemini/`、`.claude/`、`.codex/` の `knowledge-entry.md` | リンク |
 
 Skill本文は、どの入口でも取り込みません。
 

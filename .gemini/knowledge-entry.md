@@ -1,6 +1,6 @@
-# .gemeni Universal Knowledge Entry
+# .gemini Universal Knowledge Entry
 
-`.gemeni`用の薄い参照入口です。ルール本文は複製せず、リポジトリ共通の正本を参照します。
+`.gemini`用の薄い参照入口です。ルール本文は複製せず、リポジトリ共通の正本を参照します。
 
 - [共通AI入口](../AGENTS.md)
 - [ナレッジ索引](../knowledge/INDEX.md)

@@ -43,7 +43,7 @@ REQUIRED_FILES = (
     "docs/design/shared-agents.md",
     "reports/bootstrap-report.html",
     "reports/README.md",
-    ".gemeni/knowledge-entry.md",
+    ".gemini/knowledge-entry.md",
     ".claude/knowledge-entry.md",
     ".codex/knowledge-entry.md",
     "knowledge/INDEX.md",
@@ -66,7 +66,7 @@ REQUIRED_FILES = (
     "scripts/test_migrate_knowledge.py",
     "scripts/test_validate_structure.py",
 )
-AI_DIRECTORIES = (".kiro", ".gemeni", ".claude", ".codex")
+AI_DIRECTORIES = (".kiro", ".gemini", ".claude", ".codex")
 EXCLUDED_DIRECTORY_NAMES = {".git", ".kiro", "__pycache__"}
 SENSITIVE_NAME = re.compile(
     r"(^|[._-])(env|secret|secrets|token|credential|credentials|password|passwd)([._-]|$)",
@@ -125,7 +125,7 @@ ENTRY_FILES = (
     "AGENTS.md",
     "GEMINI.md",
     ".kiro/steering/knowledge-entry.md",
-    ".gemeni/knowledge-entry.md",
+    ".gemini/knowledge-entry.md",
     ".claude/knowledge-entry.md",
     ".codex/knowledge-entry.md",
 )

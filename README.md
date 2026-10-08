@@ -8,7 +8,7 @@
 - Johnny.Decimalの考え方で、情報の場所を固定する
 - 定周期で作業の観測記録を保存する
 - 必要な事実だけをAIに読ませ、全体の一括読み込みを避ける
-- `GEMINI.md` と `.kiro`、`.gemeni`、`.claude`、`.codex` のAIツール連携を同居させる
+- `GEMINI.md` と `.kiro`、`.gemini`、`.claude`、`.codex` のAIツール連携を同居させる
 - プロジェクトの現在状態と実装仕様を別々に管理する
 
 ## 基本構成
@@ -33,7 +33,7 @@
 ├─ templates/
 ├─ .kiro/
 │  └─ steering/
-├─ .gemeni/
+├─ .gemini/
 ├─ .claude/
 ├─ .codex/
 └─ .github/workflows/
@@ -72,7 +72,7 @@ knowledge/03-output/
 ### 補助アダプター
 
 - `.kiro/`
-- `.gemeni/`
+- `.gemini/`
 - `.claude/`
 - `.codex/`
 
