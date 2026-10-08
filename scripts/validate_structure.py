@@ -29,7 +29,7 @@ REQUIRED_DIRECTORIES = (
     "knowledge/05-tasks",
     "knowledge/06-large",
     "knowledge/99-archive",
-    "projects",
+    "knowledge/projects",
     "scripts",
 )
 REQUIRED_FILES = (
@@ -59,6 +59,7 @@ REQUIRED_FILES = (
     "knowledge/00-rules/skills/README.md",
     "knowledge/01-private/.gitignore",
     "knowledge/06-large/.gitignore",
+    "knowledge/projects/INDEX.md",
     "scripts/validate_structure.py",
     "scripts/bootstrap.py",
     "scripts/reverse_bootstrap.py",
