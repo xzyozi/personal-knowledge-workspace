@@ -10,4 +10,5 @@ Codex系ツールの共有可能な入口・テンプレートを置くための
 - [ナレッジ索引](../knowledge/INDEX.md)
 - [読み取りルール](../knowledge/00-rules/00.02-read-policy.md)
 - [書き込みルール](../knowledge/00-rules/00.03-write-policy.md)
+- [共有エージェント](../knowledge/00-rules/agents/pkw-knowledge-steward.md)
 - [このツール用の参照入口](./knowledge-entry.md)

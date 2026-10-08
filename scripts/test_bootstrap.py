@@ -78,7 +78,14 @@ def prepare_worktree(root: Path, name: str) -> Path:
     shutil.copytree(
         ROOT,
         worktree,
-        ignore=shutil.ignore_patterns(".git", "bootstrap.local.toml", "bootstrap-report.json"),
+        ignore=shutil.ignore_patterns(
+            ".git",
+            "bootstrap.local.toml",
+            "bootstrap-report.json",
+            "reverse-bootstrap-report.json",
+            "migrate-knowledge-report.json",
+            "bootstrap-state.json",
+        ),
     )
     return worktree
 
@@ -111,6 +118,34 @@ def assert_conflict_case(root: Path) -> None:
     report = json.loads((worktree / "reports" / "bootstrap-report.json").read_text(encoding="utf-8"))
     assert report["status"] == "conflict"
     assert any(item["destination"] == "AGENTS.md" for item in report["items"])
+
+
+def assert_update_case(root: Path) -> None:
+    worktree = prepare_worktree(root, "update-worktree")
+    target = root / "update-target"
+    write_local_config(worktree, target)
+    first = run_bootstrap(worktree, "--apply", "--confirm")
+    assert first.returncode == 0, first.stderr
+
+    template = worktree / "AGENTS.md"
+    deployed = target / "AGENTS.md"
+    template.write_bytes(template.read_bytes() + b"\n# template update 1\n")
+    dry_run = run_bootstrap(worktree)
+    assert dry_run.returncode == 0, dry_run.stderr
+    report = json.loads((worktree / "reports" / "bootstrap-report.json").read_text(encoding="utf-8"))
+    assert any(item["destination"] == "AGENTS.md" and item["action"] == "update" for item in report["items"])
+    assert deployed.read_bytes() != template.read_bytes(), "dry-run must not update the target"
+
+    updated = run_bootstrap(worktree, "--apply", "--confirm")
+    assert updated.returncode == 0, updated.stderr
+    assert deployed.read_bytes() == template.read_bytes()
+
+    deployed.write_bytes(deployed.read_bytes() + b"\n# user edit\n")
+    template.write_bytes(template.read_bytes() + b"\n# template update 2\n")
+    conflict = run_bootstrap(worktree, "--apply", "--confirm")
+    assert conflict.returncode == 10, conflict.stderr
+    assert deployed.read_bytes().endswith(b"# user edit\n"), "user edits must be kept"
+    assert b"template update 2" not in deployed.read_bytes()
 
 
 def assert_home_target_case(root: Path) -> None:
@@ -151,6 +186,7 @@ def main() -> int:
         root = Path(directory)
         assert_success_case(root)
         assert_conflict_case(root)
+        assert_update_case(root)
         assert_home_target_case(root)
     print("bootstrap fixture validation passed")
     return 0

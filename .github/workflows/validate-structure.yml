@@ -32,6 +32,9 @@ jobs:
       - name: Validate structure
         run: python scripts/validate_structure.py
 
+      - name: Validate shared definition checks
+        run: python scripts/test_validate_structure.py
+
       - name: Validate bootstrap fixtures
         run: python scripts/test_bootstrap.py
 

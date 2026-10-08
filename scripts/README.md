@@ -9,6 +9,7 @@
 - `test_bootstrap.py`: 一時fixtureだけを使うbootstrap検証
 - `test_reverse_bootstrap.py`: 一時fixtureだけを使うreverse-bootstrap検証
 - `test_migrate_knowledge.py`: 一時fixtureだけを使う移行検証
+- `test_validate_structure.py`: 共有エージェント・Skillの検査を、一時ツリーで検証する
 - `validate_structure.py`: リポジトリ構造検証
 
 ## Bootstrap
@@ -28,6 +29,17 @@ python scripts/view_bootstrap_report.py
 
 成功したbootstrapの対象状態は、Git管理外の`reports/bootstrap-state.json`へ保存されます。
 
+`default` profileの配布対象は、更新モード`update-if-unmodified`です。
+
+| 配布先の状態 | 動作 |
+|---|---|
+| ファイルがない | 作成 |
+| テンプレートと同一内容 | skip |
+| 内容が違い、前回適用時のhashと一致（利用者が未変更） | 更新 |
+| 内容が違い、前回適用時のhashと不一致、または適用記録がない | 衝突（全体を適用しない） |
+
+前回適用時のhashは`bootstrap-state.json`に記録されています。利用者が変更したファイルは上書きしません。
+
 ### ホーム直下への展開
 
 AIツールにグローバル設定として読ませる場合は、`config/bootstrap.local.toml`でホームをtargetにします。ホームを指定するには、`allow_home = true`の明示が必要です。
@@ -38,7 +50,7 @@ root = "~/"
 allow_home = true
 ```
 
-- 展開は`config/bootstrap.toml`の許可リストの新規作成だけです。ホーム直下の既存ファイルは上書きせず、同名があれば衝突として全体を適用しません。
+- 展開は`config/bootstrap.toml`の許可リストだけです。既存ファイルは、利用者が変更していない場合に限りテンプレートの更新を反映し、変更されている場合は衝突として全体を適用しません。
 - ホームより上位のディレクトリと、このリポジトリのrootはtargetにできません。
 - ホーム自体はGit作業ツリーにしません。個人ナレッジを管理する場合は、ホーム直下の`knowledge/`を独立したリポジトリ（`git init`）にします。
 

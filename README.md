@@ -138,6 +138,20 @@ python scripts/view_bootstrap_report.py --report migrate
 
 詳細な設計と安全条件は`docs/design/migrate-knowledge.md`を参照してください。
 
+## 共有エージェント
+
+入口ファイルから、このプロジェクトが管理する共有エージェント（`knowledge/00-rules/agents/pkw-knowledge-steward.md`）を読めます。エージェントは、内部のSkillの一覧（名前と説明）を持ち、現在の作業に該当するSkillだけ本文を読みます。
+
+```text
+入口（AGENTS.md など） → knowledge/00-rules/agents/ → knowledge/00-rules/skills/
+```
+
+- `agents/` と `skills/` は`knowledge/00-rules/`の下にあるため、bootstrapで配布し、reverse-bootstrapでテンプレートへ戻せます。
+- 名前は`pkw-`で始めます。frontmatterは`name`と`description`だけです。
+- `python scripts/validate_structure.py`が、形式、Skill一覧との整合、入口からの参照を検査します。
+
+詳細は`docs/design/shared-agents.md`を参照してください。
+
 ## 検証
 
 追加依存関係なしで構造を検証できます。
