@@ -28,7 +28,6 @@
 │  ├─ 05-tasks/
 │  ├─ 06-large/
 │  └─ 99-archive/
-├─ projects/
 ├─ scripts/
 ├─ templates/
 ├─ .kiro/
