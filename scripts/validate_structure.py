@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import os
 import re
 import sys
 import tomllib
 from pathlib import Path
+from urllib.parse import unquote as url_unquote
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED_DIRECTORIES = (
@@ -362,6 +364,69 @@ def check_legacy_names(errors: list[str], root: Path = ROOT) -> None:
             errors.append(f"legacy name remains: {path.relative_to(root).as_posix()}")
 
 
+MARKDOWN_EXCLUDED_DIRECTORIES = frozenset({".git", "__pycache__", "node_modules"})
+MARKDOWN_EXCLUDED_PREFIXES = ("knowledge/01-private/", "knowledge/04-sources/", "knowledge/06-large/")
+FENCE_LINE = re.compile(r"^\s*(```|~~~)")
+INLINE_CODE = re.compile(r"`[^`]*`")
+MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
+ABSOLUTE_WINDOWS_PATH = re.compile(r"[A-Za-z]:[\\/](?:Users|Documents and Settings)[\\/]")
+ABSOLUTE_UNIX_PATH = re.compile(r"(?<![\w.~])/(?:home|Users)/[^/\s]+")
+EXTERNAL_LINK = re.compile(r"^(?:[A-Za-z][A-Za-z0-9+.-]*:|#)")
+
+
+def iter_markdown_files(root: Path):
+    """書式検査の対象のMarkdownを列挙する。原本とローカル専用の領域は除く。"""
+    for current, directories, files in os.walk(root):
+        directories[:] = [name for name in directories if name not in MARKDOWN_EXCLUDED_DIRECTORIES]
+        for name in sorted(files):
+            if not name.endswith(".md"):
+                continue
+            path = Path(current) / name
+            if path.relative_to(root).as_posix().startswith(MARKDOWN_EXCLUDED_PREFIXES):
+                continue
+            yield path
+
+
+def strip_code(text: str) -> str:
+    """コードブロックとインラインコードを除いた本文を返す。書式の例を、リンク検査の対象にしないため。"""
+    visible: list[str] = []
+    in_fence = False
+    for line in text.split("\n"):
+        if FENCE_LINE.match(line):
+            in_fence = not in_fence
+            continue
+        if not in_fence:
+            visible.append(INLINE_CODE.sub("", line))
+    return "\n".join(visible)
+
+
+def check_markdown_hygiene(errors: list[str], root: Path = ROOT) -> None:
+    """Markdownの書式（改行コード、タブ、コードブロック、絶対パス、リンク）を検査する。"""
+    for path in iter_markdown_files(root):
+        relative = path.relative_to(root).as_posix()
+        try:
+            data = path.read_bytes()
+            text = data.decode("utf-8")
+        except (OSError, UnicodeDecodeError):
+            errors.append(f"markdown is unreadable or not UTF-8: {relative}")
+            continue
+        if b"\r" in data:
+            errors.append(f"markdown must use LF line endings: {relative}")
+        if "\t" in text:
+            errors.append(f"markdown must not contain tab characters: {relative}")
+        if sum(1 for line in text.split("\n") if FENCE_LINE.match(line)) % 2 != 0:
+            errors.append(f"markdown has an unclosed code fence: {relative}")
+        if ABSOLUTE_WINDOWS_PATH.search(text) or ABSOLUTE_UNIX_PATH.search(text):
+            errors.append(f"markdown contains an absolute path: {relative}")
+        for match in MARKDOWN_LINK.finditer(strip_code(text)):
+            target = match.group(1)
+            if EXTERNAL_LINK.match(target) or any(char in target for char in "<>{}"):
+                continue
+            link_path = url_unquote(target.split("#", 1)[0])
+            if link_path and not (path.parent / link_path).exists():
+                errors.append(f"markdown link is broken: {target} in {relative}")
+
+
 def main() -> int:
     errors: list[str] = []
     check_required_paths(errors)
@@ -370,6 +435,7 @@ def main() -> int:
     check_shared_definitions(errors)
     check_global_entries(errors)
     check_legacy_names(errors)
+    check_markdown_hygiene(errors)
     if errors:
         print("Structure validation failed:", file=sys.stderr)
         for error in errors:
