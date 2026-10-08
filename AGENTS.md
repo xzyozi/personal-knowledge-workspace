@@ -6,8 +6,9 @@
 
 1. `PROJECT.md` で目的・状態・対象範囲を確認する。
 2. `knowledge/INDEX.md` と `knowledge/00-rules/` を確認する。
-3. 現在の作業に直接関係する `knowledge/02-facts/` だけを選択的に読む。
-4. 必要な場合だけ `knowledge/04-sources/`、`knowledge/05-tasks/`、`projects/` を読む。
+3. 共有エージェント `knowledge/00-rules/agents/pkw-knowledge-steward.md` を確認し、現在の作業に該当するSkillだけを読む。
+4. 現在の作業に直接関係する `knowledge/02-facts/` だけを選択的に読む。
+5. 必要な場合だけ `knowledge/04-sources/`、`knowledge/05-tasks/`、`projects/` を読む。
 
 ## 読み取りルール
 
@@ -34,6 +35,7 @@
 - 共通入口: `AGENTS.md`
 - プロジェクト状態: `PROJECT.md`
 - ナレッジ運用: `knowledge/00-rules/`
+- 共有エージェント: `knowledge/00-rules/agents/pkw-knowledge-steward.md`
 - Gemini CLI入口: `GEMINI.md`
 - Kiro入口: `.kiro/README.md`、`.kiro/steering/knowledge-entry.md`
 - その他のAIツール入口: `.gemeni/README.md`、`.gemeni/knowledge-entry.md`、`.claude/README.md`、`.claude/knowledge-entry.md`、`.codex/README.md`、`.codex/knowledge-entry.md`

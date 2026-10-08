@@ -6,3 +6,4 @@
 @./knowledge/INDEX.md
 @./knowledge/00-rules/00.02-read-policy.md
 @./knowledge/00-rules/00.03-write-policy.md
+@./knowledge/00-rules/agents/pkw-knowledge-steward.md
