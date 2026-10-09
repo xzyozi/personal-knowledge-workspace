@@ -175,35 +175,7 @@ revision = 1
 
 [profiles.personal]
 extends = "default"
-description = "共有構成に個人用knowledgeを追加するprofile"
-
-[[profiles.personal.targets]]
-id = "personal-facts"
-source = "knowledge/02-facts"
-destination = "knowledge/02-facts"
-mode = "create-only"
-revision = 1
-
-[[profiles.personal.targets]]
-id = "personal-output"
-source = "knowledge/03-output"
-destination = "knowledge/03-output"
-mode = "create-only"
-revision = 1
-
-[[profiles.personal.targets]]
-id = "personal-sources"
-source = "knowledge/04-sources"
-destination = "knowledge/04-sources"
-mode = "create-only"
-revision = 1
-
-[[profiles.personal.targets]]
-id = "personal-tasks"
-source = "knowledge/05-tasks"
-destination = "knowledge/05-tasks"
-mode = "create-only"
-revision = 1
+description = "defaultと同じ構成。個人側の骨格は init_knowledge.py で作る（テンプレート作者の原本を配らないため、knowledge/の骨格はここでは配らない）"
 
 [storage.knowledge]
 provider = "local"
