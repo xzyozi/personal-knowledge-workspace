@@ -30,8 +30,8 @@ knowledge/00-rules/
 
 初版は1つです。役割が増えた時に分割します。
 
-| name | 担当 |
-|---|---|
+| name                    | 担当                         |
+| ----------------------- | ---------------------------- |
 | `pkw-knowledge-steward` | 個人ナレッジの読み書きと分類 |
 
 エージェント定義の本文は、次の3節です。
@@ -69,9 +69,9 @@ description: 個人ナレッジの読み書きと分類を担当する共有エ�
 エージェント定義の「Skill一覧」に、表で書きます。
 
 ```markdown
-| name | description | 本文 |
-|---|---|---|
-| pkw-example | 例の説明 | [pkw-example.md](../skills/pkw-example.md) |
+| name        | description | 本文                                       |
+| ----------- | ----------- | ------------------------------------------ |
+| pkw-example | 例の説明    | [pkw-example.md](../skills/pkw-example.md) |
 ```
 
 - 現在の作業が `description` に該当する場合だけ、リンク先の本文を読みます。該当しないSkillは開きません。
@@ -85,20 +85,20 @@ description: 個人ナレッジの読み書きと分類を担当する共有エ�
 
 ### リポジトリの入口（このリポジトリで作業する時）
 
-| 入口 | 書式 |
-|---|---|
-| `AGENTS.md` | 手順とリンク（共有エージェントを確認する手順を含む） |
+| 入口        | 書式                                                    |
+| ----------- | ------------------------------------------------------- |
+| `AGENTS.md` | 手順とリンク（共有エージェントを確認する手順を含む）    |
 | `GEMINI.md` | `@./knowledge/00-rules/agents/pkw-knowledge-steward.md` |
 
 ### ツール別のグローバル入口（ホーム直下へ配布）
 
 各ツールが実際に読むファイルです。どれも `AGENTS.md` への薄い参照で、**相対パス**で書くため、リポジトリでもホームでも同じファイルが正しく動きます。
 
-| ファイル | ホーム側 | 書式 | モード |
-|---|---|---|---|
-| `.claude/CLAUDE.md` | `~/.claude/CLAUDE.md` | `@../AGENTS.md` のimport | `managed-block` |
-| `.gemini/GEMINI.md` | `~/.gemini/GEMINI.md` | `@../AGENTS.md` のimport | `managed-block` |
-| `.codex/AGENTS.md` | `~/.codex/AGENTS.md` | 「1つ上の `AGENTS.md`（グローバル設定の場合は `~/AGENTS.md`）を読む」という平文の指示 | `managed-block` |
+| ファイル                            | ホーム側                              | 書式                                                                                      | モード                 |
+| ----------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------- |
+| `.claude/CLAUDE.md`                 | `~/.claude/CLAUDE.md`                 | `@../AGENTS.md` のimport                                                                  | `managed-block`        |
+| `.gemini/GEMINI.md`                 | `~/.gemini/GEMINI.md`                 | `@../AGENTS.md` のimport                                                                  | `managed-block`        |
+| `.codex/AGENTS.md`                  | `~/.codex/AGENTS.md`                  | 「1つ上の `AGENTS.md`（グローバル設定の場合は `~/AGENTS.md`）を読む」という平文の指示     | `managed-block`        |
 | `.kiro/steering/knowledge-entry.md` | `~/.kiro/steering/knowledge-entry.md` | 「2つ上の `AGENTS.md`（グローバルsteeringの場合は `~/AGENTS.md`）を読む」という平文の指示 | `update-if-unmodified` |
 
 - Kiroは、グローバルsteeringの置き場の外にあるファイルを `#[[file:...]]` で参照できません（#12 で確認）。そのため、参照ではなく平文の指示にします。
@@ -113,11 +113,11 @@ Skill本文は、どの入口でも取り込みません。
 
 `default` profile の全対象には、更新モード `update-if-unmodified` を適用します。
 
-| ホーム側の状態 | 動作 |
-|---|---|
-| ファイルがない | 作成 |
-| テンプレートと同一内容 | skip |
-| 内容が違い、前回適用時のhashと一致（利用者が未変更） | 更新 |
+| ホーム側の状態                                             | 動作                     |
+| ---------------------------------------------------------- | ------------------------ |
+| ファイルがない                                             | 作成                     |
+| テンプレートと同一内容                                     | skip                     |
+| 内容が違い、前回適用時のhashと一致（利用者が未変更）       | 更新                     |
 | 内容が違い、前回適用時のhashと不一致、または適用記録がない | 衝突（全体を適用しない） |
 
 前回適用時のhashは、Git管理外の `reports/bootstrap-state.json` に記録されたものです。ホーム側のファイルが、過去にテンプレートから配布した内容と一致する場合だけ更新するため、利用者の編集は上書きしません。
@@ -147,24 +147,26 @@ CIで確認できるのは、構造と配布です。各ツールが実際に入
 
 ### 手順
 
+通しの手順（bootstrap、init、migrate、検証）は、[はじめに](../guide/getting-started.md)を参照してください。
+
 1. `python scripts/bootstrap.py` のdry-runで、ホームへの展開内容を確認する
 2. `python scripts/bootstrap.py --apply --confirm` で展開する
 3. 各ツールで、ホーム配下のプロジェクトを開き、次のように聞く
 
 > 共有エージェントの名前と、使えるSkillの名前を教えてください。
 
-期待する答えは、`pkw-knowledge-steward` と `pkw-verify-knowledge-load` です。
+期待する答えは、共有エージェント `pkw-knowledge-steward` と、Skill `pkw-verify-knowledge-load`、`pkw-init-knowledge` です。
 
 4. 共有Skill `pkw-verify-knowledge-load` を実行させ、結果の表を #14 に貼る
 
 ### 読み込まれたファイルの確認
 
-| ツール | 方法 |
-|---|---|
+| ツール      | 方法                                                                         |
+| ----------- | ---------------------------------------------------------------------------- |
 | Claude Code | `/memory`、`/context` で、読み込まれた `CLAUDE.md` と `AGENTS.md` を確認する |
-| Gemini CLI | `/memory show` で、連結されたコンテキストを確認する |
-| Codex | セッションの冒頭で読み込まれた指示を、ツールに説明させる |
-| Kiro | 会話に読み込まれたルール（steering）を確認する |
+| Gemini CLI  | `/memory show` で、連結されたコンテキストを確認する                          |
+| Codex       | セッションの冒頭で読み込まれた指示を、ツールに説明させる                     |
+| Kiro        | 会話に読み込まれたルール（steering）を確認する                               |
 
 Claude Codeは、プロジェクト外のファイルのimportに承認を求める場合があります。その挙動も、確認の対象です。
 
@@ -172,11 +174,11 @@ Claude Codeは、プロジェクト外のファイルのimportに承認を求め
 
 bootstrapは削除をしません。次の旧ファイルを配布済みの環境では、ホーム側の該当ファイルを手で削除してください（dry-runには表示されません）。
 
-| 旧ファイル（ホーム側） | 理由 |
-|---|---|
+| 旧ファイル（ホーム側）                            | 理由                                               |
+| ------------------------------------------------- | -------------------------------------------------- |
 | `~/.gemeni/`（`README.md`、`knowledge-entry.md`） | `.gemini` に改名したため。どのツールにも読まれない |
-| `~/.claude/knowledge-entry.md` | `CLAUDE.md` に置き換えたため |
-| `~/.codex/knowledge-entry.md` | `AGENTS.md` に置き換えたため |
+| `~/.claude/knowledge-entry.md`                    | `CLAUDE.md` に置き換えたため                       |
+| `~/.codex/knowledge-entry.md`                     | `AGENTS.md` に置き換えたため                       |
 
 `~/.kiro/steering/knowledge-entry.md` は、利用者が未変更であれば、bootstrapが更新します。
 

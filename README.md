@@ -2,6 +2,8 @@
 
 個人ナレッジ、定期記録、プロジェクト管理、AIツール向けの運用ルールを、MarkdownとGitで管理するためのワークスペースです。
 
+使い始める手順は、[docs/guide/getting-started.md](docs/guide/getting-started.md)を参照してください。
+
 ## 目的
 
 - 情報の原本・検証済み事実・成果物を分離する
